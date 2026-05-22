@@ -1,69 +1,113 @@
-# Originality Assistant Pro — Netlify Fixed Version
+# Originality Studio Pro — Netlify Edition
 
-A Netlify-ready originality assistant and ethical rewriting tool with a polished interface, local rewrite engine, and similarity scoring.
+A professional Netlify-ready rewriting workspace with two modes:
 
-## Why this version fixes Netlify install errors
+1. **Algorithm Rewriter** — works without any API key. It uses local phrase replacement, synonym rewriting, structure recasting, AI-style cleanup, grammar/punctuation polishing, bias-cleaning replacements, and similarity scoring.
+2. **AI Rewrite Assist** — optional server-side AI rewriting through a Netlify Function. Add `GEMINI_API_KEY` in Netlify environment variables. If no key is present, the app automatically falls back to the algorithm engine.
 
-This build uses **zero npm dependencies**, so Netlify does not need to download React, Vite, or any package bundle. It also pins Node to version 20 through:
-
-- `.nvmrc`
-- `.node-version`
-- `netlify.toml` build environment
-- `package.json` engines
-
-This avoids common Node 22 / npm install crashes such as `npm error Exit handler never called!`.
+> Important: This is an ethical originality and editing assistant. It does not check the internet, does not guarantee plagiarism removal, and should not be sold as a tool to bypass plagiarism or AI detectors. Users should cite borrowed ideas.
 
 ## Features
 
-- Professional SaaS-style UI
-- Works on Netlify
-- No paid API required
-- No npm dependencies
-- Netlify Function endpoint: `/api/rewrite`
-- Browser fallback engine
-- Academic, Professional, Human Natural, Simple, and Creative modes
-- Light, Balanced, Strong, and Maximum rewrite strengths
+- Premium responsive SaaS-style interface
+- Algorithm Rewriter with no API key
+- Optional AI Rewrite Assist using a server-side environment key
+- Academic, professional, simple, creative, and e-commerce modes
+- Light, balanced, strong, and maximum rewrite strengths
+- Bias Cleaner for common harmful/outdated terms
+- TXT/MD upload
+- Copy button
+- TXT and HTML download
 - Similarity estimate
 - Originality lift score
 - Phrase overlap score
 - Readability score
-- TXT upload
-- TXT download
-- Copy button
+- Local rewrite history
+- Netlify Functions endpoint: `/api/rewrite`
+- Node 20 pinned to avoid Node/npm deployment issues
 
-## Run locally
+## Netlify deployment
+
+Use these settings:
+
+```txt
+Build command: npm run build
+Publish directory: public
+Functions directory: netlify/functions
+Node version: 20
+```
+
+The included `netlify.toml`, `.nvmrc`, and `.node-version` already configure this.
+
+## Optional AI setup
+
+In Netlify:
+
+1. Go to **Site configuration**.
+2. Open **Environment variables**.
+3. Add:
+
+```txt
+GEMINI_API_KEY = your_google_ai_studio_key
+```
+
+Optional:
+
+```txt
+GEMINI_MODEL = gemini-2.5-flash
+```
+
+Redeploy the site after adding the key.
+
+## Local testing
+
+Install Netlify CLI if needed:
 
 ```bash
-npm install
+npm install -g netlify-cli
+```
+
+Run:
+
+```bash
 npm run dev
 ```
 
-Open:
+Then open the local Netlify URL shown in the terminal.
 
-```txt
-http://localhost:8888
-```
+## How the two engines work
 
-## Deploy to Netlify
+### Algorithm Rewriter
 
-1. Upload this project to GitHub.
-2. Go to Netlify.
-3. Import the GitHub repository.
-4. Use these settings:
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-5. Deploy.
+This engine is rule-based. It improves text using:
 
-Netlify should automatically read `netlify.toml`.
+- phrase-level rewriting
+- synonym substitution
+- sentence recasting
+- product-title expansion
+- AI-style phrase cleanup
+- grammar and punctuation cleanup
+- inclusive language cleanup
+- similarity and phrase overlap scoring
 
-## Important note
+### AI Rewrite Assist
 
-This tool does not check the internet, Turnitin, Google Scholar, or academic databases. It estimates similarity between the original text and rewritten output. Always cite sources when ideas are borrowed.
+This mode sends the input to a server-side Netlify Function. The API key stays on the server and is not exposed in browser JavaScript. The prompt asks the AI to rewrite ethically, preserve meaning, improve grammar, and keep citation-friendly wording.
 
-Recommended selling name:
+## Selling suggestion
 
-**Originality Assistant Pro — Netlify Ready Rewriter & Similarity Checker**
+Recommended product name:
 
-Do not honestly sell any local tool as a “100% plagiarism remover.” A safer promise is:
+**Originality Studio Pro — Netlify Rewriter & Writing Polish Tool**
 
-> Rewrite content for clearer structure, smoother wording, and reduced direct textual overlap.
+Recommended description:
+
+"A Netlify-ready web app that helps users rewrite and polish text with a no-key algorithm engine and optional server-side AI Rewrite Assist. Includes similarity analysis, phrase overlap score, readability score, document upload, and download tools."
+
+Avoid claims like:
+
+- 100% plagiarism remover
+- guaranteed AI detector bypass
+- remove plagiarism without citation
+
+Those claims are not honest and can create problems for buyers.

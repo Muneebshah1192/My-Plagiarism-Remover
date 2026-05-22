@@ -1,18 +1,25 @@
 {
-  "name": "originality-assistant-netlify-fixed",
-  "version": "4.0.0",
+  "name": "originality-studio-pro-netlify",
+  "version": "3.0.0",
   "private": true,
-  "description": "Netlify-ready originality assistant with zero npm dependencies, local rewrite engine, and similarity scoring.",
+  "description": "Professional Netlify-ready originality assistant with algorithmic rewriting, optional AI rewrite assist, grammar polish, and similarity analysis.",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/dev-server.mjs",
-    "start": "node scripts/dev-server.mjs",
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build-check.mjs",
+    "dev": "npx netlify-cli dev",
+    "start": "npx netlify-cli dev"
   },
-  "dependencies": {},
-  "devDependencies": {},
   "engines": {
-    "node": "20.x",
-    "npm": ">=10 <11"
-  }
+    "node": "20.x"
+  },
+  "keywords": [
+    "netlify",
+    "rewriter",
+    "originality",
+    "paraphraser",
+    "grammar",
+    "serverless"
+  ],
+  "author": "Originality Studio Pro",
+  "license": "Commercial"
 }

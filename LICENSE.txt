@@ -1,0 +1,4 @@
+Commercial starter template license.
+
+You may edit, brand, deploy, and sell your own modified version of this project.
+You should not sell it with dishonest claims such as guaranteed plagiarism removal or AI detector bypass.

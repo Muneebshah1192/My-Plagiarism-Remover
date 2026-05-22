@@ -1,130 +1,179 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="A Netlify-ready originality assistant and ethical rewriting tool with local similarity scoring." />
-    <title>Originality Assistant Pro</title>
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body>
-    <div class="bg-orb orb-one"></div>
-    <div class="bg-orb orb-two"></div>
-    <div class="bg-grid"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Originality Studio Pro</title>
+  <meta name="description" content="Professional originality assistant with algorithmic rewriting, AI rewrite assist, grammar polish, bias cleaner, and similarity analysis." />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
 
-    <main class="shell">
-      <nav class="topbar">
-        <div class="brand">
-          <div class="logo">OA</div>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">ORIGINALITY STUDIO PRO</p>
+        <h1>Rewrite, polish, and clean text with a premium workspace.</h1>
+        <p class="hero-copy">Choose Algorithm Rewriter for no-key rewriting, or AI Rewrite Assist for server-side model rewriting when your Netlify environment key is configured.</p>
+      </div>
+      <div class="hero-card">
+        <span class="status-dot"></span>
+        <div>
+          <strong>Netlify ready</strong>
+          <small>Static frontend + serverless rewrite function</small>
+        </div>
+      </div>
+    </header>
+
+    <section class="control-bar panel">
+      <div class="engine-switch" role="tablist" aria-label="Rewrite engine">
+        <button class="engine-btn active" data-engine="algorithm" type="button">
+          <span>Algorithm Rewriter</span>
+          <small>No API key</small>
+        </button>
+        <button class="engine-btn" data-engine="ai" type="button">
+          <span>AI Rewrite Assist</span>
+          <small>Uses Netlify env key</small>
+        </button>
+      </div>
+
+      <div class="field-row">
+        <label>
+          Writing mode
+          <select id="mode">
+            <option value="professional">Professional</option>
+            <option value="academic">Academic</option>
+            <option value="simple">Simple</option>
+            <option value="creative">Creative</option>
+            <option value="ecommerce">E-commerce / Product Copy</option>
+          </select>
+        </label>
+        <label>
+          Rewrite strength
+          <select id="strength">
+            <option value="balanced">Balanced</option>
+            <option value="strong" selected>Strong</option>
+            <option value="maximum">Maximum</option>
+            <option value="light">Light</option>
+          </select>
+        </label>
+        <label class="toggle-card">
+          <input id="biasClean" type="checkbox" checked />
+          <span>
+            Bias Cleaner
+            <small>Neutralizes common harmful or outdated wording</small>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <article class="editor panel">
+        <div class="panel-head">
           <div>
-            <p class="eyebrow">Netlify Ready</p>
-            <h1>Originality Assistant Pro</h1>
+            <p class="label">INPUT</p>
+            <h2>Original text</h2>
           </div>
-        </div>
-        <div class="pill">No API • No Database • Local Engine</div>
-      </nav>
-
-      <section class="hero card glow-card">
-        <div class="hero-copy">
-          <span class="tag">Ethical Rewriter + Similarity Estimator</span>
-          <h2>Rewrite text with stronger structure, smoother wording, and lower direct overlap.</h2>
-          <p>
-            Paste your text, choose a mode, and generate a cleaner rewritten version. This tool is designed for drafting support, not academic cheating.
-          </p>
-        </div>
-        <div class="hero-stats">
-          <div><strong>0</strong><span>API keys</span></div>
-          <div><strong>4</strong><span>rewrite strengths</span></div>
-          <div><strong>5</strong><span>writing modes</span></div>
-        </div>
-      </section>
-
-      <section class="workspace">
-        <div class="panel card">
-          <div class="panel-head">
-            <div>
-              <p class="eyebrow">Input</p>
-              <h3>Original Text</h3>
-            </div>
+          <div class="actions">
             <label class="upload-btn">
               Upload TXT
-              <input id="fileInput" type="file" accept=".txt,text/plain" />
+              <input id="fileInput" type="file" accept=".txt,.md,.csv,text/plain,text/markdown" hidden />
             </label>
+            <button id="sampleBtn" class="ghost" type="button">Try sample</button>
           </div>
+        </div>
+        <textarea id="inputText" spellcheck="true" placeholder="Paste your paragraph, article, product description, assignment draft, or website copy here..."></textarea>
+        <div class="editor-footer">
+          <span id="inputStats">0 words</span>
+          <button id="clearBtn" class="link-btn" type="button">Clear</button>
+        </div>
+      </article>
 
-          <textarea id="inputText" spellcheck="true" placeholder="Paste your paragraph, assignment draft, blog section, or product description here..."></textarea>
-
-          <div class="controls">
-            <label>
-              Mode
-              <select id="modeSelect">
-                <option value="professional">Professional</option>
-                <option value="academic">Academic</option>
-                <option value="human">Human Natural</option>
-                <option value="simple">Simple</option>
-                <option value="creative">Creative</option>
-              </select>
-            </label>
-            <label>
-              Strength
-              <select id="intensitySelect">
-                <option value="light">Light</option>
-                <option value="balanced" selected>Balanced</option>
-                <option value="strong">Strong</option>
-                <option value="maximum">Maximum</option>
-              </select>
-            </label>
+      <article class="editor panel output-panel">
+        <div class="panel-head">
+          <div>
+            <p class="label">OUTPUT</p>
+            <h2>Rewritten text</h2>
           </div>
-
           <div class="actions">
-            <button id="rewriteBtn" class="primary-btn">Rewrite Text</button>
-            <button id="sampleBtn" class="secondary-btn">Try Sample</button>
-            <button id="clearBtn" class="ghost-btn">Clear</button>
+            <button id="copyBtn" class="ghost" type="button">Copy</button>
+            <button id="downloadTxtBtn" class="ghost" type="button">TXT</button>
+            <button id="downloadHtmlBtn" class="ghost" type="button">HTML</button>
           </div>
         </div>
-
-        <div class="panel card output-card">
-          <div class="panel-head">
-            <div>
-              <p class="eyebrow">Output</p>
-              <h3>Rewritten Text</h3>
-            </div>
-            <div class="mini-actions">
-              <button id="copyBtn" class="icon-btn">Copy</button>
-              <button id="downloadBtn" class="icon-btn">Download</button>
-            </div>
-          </div>
-
-          <div id="outputText" class="output empty">Your rewritten result will appear here.</div>
-
-          <div id="notice" class="notice">
-            This tool estimates text overlap only. It does not check the internet or guarantee plagiarism removal.
-          </div>
+        <textarea id="outputText" spellcheck="true" placeholder="Your rewritten text will appear here. You can edit it manually before copying or downloading."></textarea>
+        <div class="editor-footer">
+          <span id="outputStats">0 words</span>
+          <span id="engineUsed" class="pill">Ready</span>
         </div>
-      </section>
+      </article>
+    </section>
 
-      <section class="metrics-grid">
-        <div class="metric card"><span>Estimated Similarity</span><strong id="similarityMetric">0%</strong><div class="bar"><i id="similarityBar"></i></div></div>
-        <div class="metric card"><span>Originality Lift</span><strong id="liftMetric">0%</strong><div class="bar"><i id="liftBar"></i></div></div>
-        <div class="metric card"><span>Phrase Overlap</span><strong id="phraseMetric">0%</strong><div class="bar"><i id="phraseBar"></i></div></div>
-        <div class="metric card"><span>Readability</span><strong id="readabilityMetric">0</strong><div class="bar"><i id="readabilityBar"></i></div></div>
-      </section>
+    <section class="cta-row">
+      <button id="rewriteBtn" class="primary" type="button">
+        <span class="btn-main">Rewrite Text</span>
+        <span class="btn-sub">grammar + wording + structure</span>
+      </button>
+      <button id="polishBtn" class="secondary" type="button">Polish Output</button>
+      <button id="swapBtn" class="secondary" type="button">Use Output as Input</button>
+    </section>
 
-      <section class="details card">
+    <section class="metrics-grid" aria-label="Text analysis metrics">
+      <div class="metric panel">
+        <p>Estimated similarity</p>
+        <strong id="similarity">0%</strong>
+        <div class="bar"><span id="similarityBar"></span></div>
+      </div>
+      <div class="metric panel">
+        <p>Originality lift</p>
+        <strong id="lift">0%</strong>
+        <div class="bar"><span id="liftBar"></span></div>
+      </div>
+      <div class="metric panel">
+        <p>Phrase overlap</p>
+        <strong id="phraseOverlap">0%</strong>
+        <div class="bar"><span id="phraseBar"></span></div>
+      </div>
+      <div class="metric panel">
+        <p>Readability</p>
+        <strong id="readability">0</strong>
+        <div class="bar"><span id="readabilityBar"></span></div>
+      </div>
+    </section>
+
+    <section class="assistant-panel panel">
+      <div class="panel-head slim">
         <div>
-          <p class="eyebrow">Rewrite Notes</p>
-          <h3>Suggestions</h3>
+          <p class="label">REWRITE NOTES</p>
+          <h2>Quality guidance</h2>
         </div>
-        <ul id="tipsList">
-          <li>Paste text and click rewrite to get suggestions.</li>
-        </ul>
-      </section>
+      </div>
+      <ul id="notes">
+        <li>Paste text and choose an engine. For real AI rewriting, add <code>GEMINI_API_KEY</code> in Netlify environment variables.</li>
+        <li>For product titles, use E-commerce mode and Maximum strength.</li>
+        <li>For academic text, keep citations for borrowed ideas even after rewriting.</li>
+      </ul>
+    </section>
 
-      <footer>
-        <p>Use responsibly: add citations for borrowed ideas and review every output before submission or publishing.</p>
-      </footer>
-    </main>
+    <section class="history panel">
+      <div class="panel-head slim">
+        <div>
+          <p class="label">LOCAL HISTORY</p>
+          <h2>Recent rewrites</h2>
+        </div>
+        <button id="clearHistoryBtn" class="ghost" type="button">Clear history</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
 
-    <script type="module" src="/app.js"></script>
-  </body>
+    <footer>
+      This tool rewrites and analyzes wording. It does not check the internet and cannot guarantee plagiarism removal. Use citations for borrowed ideas and review every output.
+    </footer>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
 </html>
