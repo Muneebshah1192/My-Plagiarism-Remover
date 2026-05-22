@@ -1,0 +1,23 @@
+{
+  "name": "originality-assistant-netlify-pro",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Netlify-ready local originality assistant and ethical rewriter. No paid API required.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "netlify-dev": "netlify dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}

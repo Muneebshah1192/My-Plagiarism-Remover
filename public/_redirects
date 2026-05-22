@@ -1,0 +1,2 @@
+/api/rewrite /.netlify/functions/rewrite 200
+/* /index.html 200
