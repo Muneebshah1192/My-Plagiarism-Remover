@@ -1,23 +1,18 @@
 {
-  "name": "originality-assistant-netlify-pro",
-  "version": "3.0.0",
+  "name": "originality-assistant-netlify-fixed",
+  "version": "4.0.0",
   "private": true,
-  "description": "Netlify-ready local originality assistant and ethical rewriter. No paid API required.",
+  "description": "Netlify-ready originality assistant with zero npm dependencies, local rewrite engine, and similarity scoring.",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "netlify-dev": "netlify dev",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "node scripts/dev-server.mjs",
+    "start": "node scripts/dev-server.mjs",
+    "build": "node scripts/build.mjs"
   },
-  "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "react": "latest",
-    "react-dom": "latest"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "engines": {
-    "node": ">=18.17.0"
+    "node": "20.x",
+    "npm": ">=10 <11"
   }
 }

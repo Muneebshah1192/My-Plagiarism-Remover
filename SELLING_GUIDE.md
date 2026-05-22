@@ -1,35 +1,33 @@
-# Selling Guide
+# Gumroad Selling Guide
 
-## Recommended Gumroad product name
+## Product title
 
 Originality Assistant Pro — Netlify Ready Rewriter & Similarity Checker
 
-## Short product description
+## Short description
 
-A premium React + Netlify web app that rewrites text locally, estimates similarity, and helps users improve clarity and originality without paid API keys.
+A clean, deployable writing assistant that rewrites text, estimates similarity, and helps users reduce direct text overlap without any paid API.
 
-## Honest feature bullets
+## Safe marketing points
 
-- Netlify-ready React + Vite project
-- Beautiful responsive SaaS-style UI
-- No API key required
-- Serverless rewrite function
-- Browser fallback rewrite logic
-- Similarity and phrase-overlap estimate
-- Readability score
-- TXT upload and TXT export
-- Easy to customize and resell after branding
+- No paid API required
+- Netlify deployable
+- Beautiful web interface
+- Local rewrite engine
+- Similarity estimate
+- TXT upload and download
+- Multiple writing modes
+- Multiple rewrite strengths
 
 ## Avoid these claims
 
-- 100% plagiarism remover
+Do not claim:
+
+- 100% plagiarism removal
 - Turnitin bypass
-- Guaranteed undetectable writing
-- Removes all plagiarism automatically
+- AI detector bypass
+- guaranteed academic safety
 
-## Safer claims
+Use this instead:
 
-- Reduces direct wording overlap
-- Helps rewrite text for originality support
-- Improves clarity and structure
-- Includes similarity estimation between original and rewritten output
+> Helps rewrite content for better clarity, smoother expression, and reduced direct textual overlap. Users should verify output and cite sources where needed.
