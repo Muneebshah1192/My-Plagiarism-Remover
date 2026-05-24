@@ -1,113 +1,137 @@
-# Originality Studio Pro — Netlify Edition
+# Originality Studio Pro
 
-A professional Netlify-ready rewriting workspace with two modes:
+A professional Python web app for text rewriting, grammar polishing, AI-style cleanup, product copy rewriting, summaries, bullet points, titles, keyword extraction, and bias-aware wording cleanup.
 
-1. **Algorithm Rewriter** — works without any API key. It uses local phrase replacement, synonym rewriting, structure recasting, AI-style cleanup, grammar/punctuation polishing, bias-cleaning replacements, and similarity scoring.
-2. **AI Rewrite Assist** — optional server-side AI rewriting through a Netlify Function. Add `GEMINI_API_KEY` in Netlify environment variables. If no key is present, the app automatically falls back to the algorithm engine.
+## Main features
 
-> Important: This is an ethical originality and editing assistant. It does not check the internet, does not guarantee plagiarism removal, and should not be sold as a tool to bypass plagiarism or AI detectors. Users should cite borrowed ideas.
-
-## Features
-
-- Premium responsive SaaS-style interface
-- Algorithm Rewriter with no API key
-- Optional AI Rewrite Assist using a server-side environment key
-- Academic, professional, simple, creative, and e-commerce modes
-- Light, balanced, strong, and maximum rewrite strengths
-- Bias Cleaner for common harmful/outdated terms
+- User signup and login
+- Dashboard with multiple working text tools
+- Algorithm Rewriter that works without any API key
+- AI Rewrite Assist with optional Gemini or OpenAI API key
+- API settings from the three-dot menu in the dashboard
+- History panel for recent generations
 - TXT/MD upload
-- Copy button
-- TXT and HTML download
-- Similarity estimate
-- Originality lift score
-- Phrase overlap score
-- Readability score
-- Local rewrite history
-- Netlify Functions endpoint: `/api/rewrite`
-- Node 20 pinned to avoid Node/npm deployment issues
+- TXT download
+- Similarity estimate, originality lift, phrase overlap, readability score
+- SQLite database included automatically
+- Clean Python backend and premium responsive UI
 
-## Netlify deployment
+## Tools included
 
-Use these settings:
+1. Algorithm Rewriter
+2. AI Rewrite Assist
+3. AI-Style Cleaner
+4. Grammar & Punctuation Polish
+5. Bias Cleaner
+6. Product Description Rewriter
+7. Smart Summarizer
+8. Text Expander
+9. Bullet Point Generator
+10. Title Generator
+11. Keyword Extractor
 
-```txt
-Build command: npm run build
-Publish directory: public
-Functions directory: netlify/functions
-Node version: 20
-```
+## Important note
 
-The included `netlify.toml`, `.nvmrc`, and `.node-version` already configure this.
+This app rewrites and improves text, but no tool can honestly guarantee perfect originality or check every source on the internet. Users should add citations when the original idea, fact, or research belongs to another source.
 
-## Optional AI setup
-
-In Netlify:
-
-1. Go to **Site configuration**.
-2. Open **Environment variables**.
-3. Add:
-
-```txt
-GEMINI_API_KEY = your_google_ai_studio_key
-```
-
-Optional:
-
-```txt
-GEMINI_MODEL = gemini-2.5-flash
-```
-
-Redeploy the site after adding the key.
-
-## Local testing
-
-Install Netlify CLI if needed:
+## Local setup
 
 ```bash
-npm install -g netlify-cli
+python -m venv venv
+```
+
+Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+Mac/Linux:
+
+```bash
+source venv/bin/activate
+```
+
+Install requirements:
+
+```bash
+pip install -r requirements.txt
 ```
 
 Run:
 
 ```bash
-npm run dev
+python app.py
 ```
 
-Then open the local Netlify URL shown in the terminal.
+Open:
 
-## How the two engines work
+```text
+http://127.0.0.1:5000
+```
 
-### Algorithm Rewriter
+## Production run
 
-This engine is rule-based. It improves text using:
+```bash
+gunicorn app:app
+```
 
-- phrase-level rewriting
-- synonym substitution
-- sentence recasting
-- product-title expansion
-- AI-style phrase cleanup
-- grammar and punctuation cleanup
-- inclusive language cleanup
-- similarity and phrase overlap scoring
+## Environment variables
 
-### AI Rewrite Assist
+Create a `.env` file using `.env.example` as a guide.
 
-This mode sends the input to a server-side Netlify Function. The API key stays on the server and is not exposed in browser JavaScript. The prompt asks the AI to rewrite ethically, preserve meaning, improve grammar, and keep citation-friendly wording.
+Required for production:
 
-## Selling suggestion
+```env
+SECRET_KEY=your-long-random-secret-key
+```
 
-Recommended product name:
+Optional AI keys:
 
-**Originality Studio Pro — Netlify Rewriter & Writing Polish Tool**
+```env
+GEMINI_API_KEY=your-key
+OPENAI_API_KEY=your-key
+DEFAULT_AI_PROVIDER=gemini
+GEMINI_MODEL=gemini-1.5-flash
+OPENAI_MODEL=gpt-4o-mini
+```
 
-Recommended description:
+Users can also add their own API key from the app's three-dot settings menu.
 
-"A Netlify-ready web app that helps users rewrite and polish text with a no-key algorithm engine and optional server-side AI Rewrite Assist. Includes similarity analysis, phrase overlap score, readability score, document upload, and download tools."
+## Deploying from GitHub
 
-Avoid claims like:
+This is a Python Flask application. Deploy it on any host that supports Python web apps, WSGI/Gunicorn, or Docker.
 
-- 100% plagiarism remover
-- guaranteed AI detector bypass
-- remove plagiarism without citation
+Common build/start settings:
 
-Those claims are not honest and can create problems for buyers.
+```text
+Install command: pip install -r requirements.txt
+Start command: gunicorn app:app
+```
+
+For Docker hosting, use the included `Dockerfile`.
+
+## First user becomes admin
+
+The first account created in the app receives the `admin` role. Later users receive the `user` role.
+
+## Custom branding
+
+You can change app name in `.env`:
+
+```env
+APP_NAME=Your Brand Name
+```
+
+You can edit styles in:
+
+```text
+static/css/styles.css
+```
+
+You can edit tools and algorithms in:
+
+```text
+core/rewrite_engine.py
+core/ai_clients.py
+```
