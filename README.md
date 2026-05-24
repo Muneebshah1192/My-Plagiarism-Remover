@@ -1,6 +1,6 @@
 # TextForge Studio — Hybrid Subscription Pro
 
-Made for: **Syed Muneeb**
+Made By: **Syed Muneeb**
 
 TextForge Studio is a platform-neutral Flask web app for writing, rewriting, SEO, student, business, social media, and document text workflows. This upgraded version includes:
 
@@ -86,14 +86,6 @@ This build includes:
 - Improved input/output text contrast and output panel tint.
 - Manual EasyPaisa proof approval upgrades users to premium automatically.
 
-Default admin login:
-
-```text
-Email: muneebshah1192@gmail.com
-Password: Muneebshah1192@theadmin.com
-```
-
-Change `ADMIN_PASSWORD` and `SECRET_KEY` before publishing.
 
 ## UI v2 Bright Professional Update
 This build uses a bright gradient interface by default, improved dark mode contrast, larger readable typography, clearer sidebar cards, fixed dropdown z-index, and highly visible input/output text areas. Browser theme storage now uses a new key so old dark-mode cache does not force the previous heavy dark interface for returning testers.
