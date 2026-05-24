@@ -21,21 +21,6 @@ TextForge Studio is a platform-neutral Flask web app for writing, rewriting, SEO
 - Hybrid mode fallback: if API fails, built-in algorithm still runs
 - TXT, MD, DOCX, and PDF import/export support
 
-## Admin Login
-
-Email:
-
-```text
-muneebshah1192@gmail.com
-```
-
-Password:
-
-```text
-Muneebshah1192@theadmin.com
-```
-
-Change this password and `SECRET_KEY` before publishing.
 
 ## Run Locally
 
