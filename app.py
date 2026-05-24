@@ -1,255 +1,279 @@
 import os
 import sqlite3
+import io
+import json
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 
-from core.rewrite_engine import process_tool, metrics, normalize_text
-from core.ai_clients import rewrite_with_ai
+from text_engine import TOOL_CATEGORIES, TOOL_INFO, process_tool, metrics
 
-load_dotenv()
-
-APP_NAME = os.getenv("APP_NAME", "Originality Studio Pro")
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data")
-os.makedirs(DATA_DIR, exist_ok=True)
-DB_PATH = os.path.join(DATA_DIR, "app.db")
+APP_NAME = os.getenv('APP_NAME', 'TextForge Studio')
+DB_PATH = os.getenv('DATABASE_PATH', os.path.join(os.path.dirname(__file__), 'instance', 'textforge.db'))
+UPLOAD_EXTENSIONS = {'.txt', '.md', '.docx', '.pdf'}
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "change-this-secret-key-before-production")
-app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-secret-key-before-production')
+app.config['MAX_CONTENT_LENGTH'] = 12 * 1024 * 1024
 
 
-def db():
+def get_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 
 def init_db():
-    with db() as conn:
-        conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                role TEXT DEFAULT 'user',
-                created_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS api_settings (
-                user_id INTEGER PRIMARY KEY,
-                provider TEXT DEFAULT 'gemini',
-                model TEXT DEFAULT 'gemini-1.5-flash',
-                api_key TEXT DEFAULT '',
-                updated_at TEXT,
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            );
-            CREATE TABLE IF NOT EXISTS history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                tool TEXT NOT NULL,
-                tone TEXT,
-                strength TEXT,
-                input_text TEXT NOT NULL,
-                output_text TEXT NOT NULL,
-                score_similarity REAL,
-                score_lift REAL,
-                created_at TEXT NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            );
-            """
-        )
+    with get_db() as db:
+        db.executescript('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            tool_id TEXT NOT NULL,
+            input_text TEXT NOT NULL,
+            output_text TEXT NOT NULL,
+            stats_json TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE TABLE IF NOT EXISTS settings (
+            user_id INTEGER PRIMARY KEY,
+            default_tone TEXT DEFAULT 'professional',
+            default_strength TEXT DEFAULT 'strong',
+            brand_name TEXT DEFAULT 'TextForge Studio',
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        ''')
 
 
-init_db()
+@app.before_request
+def ensure_db():
+    init_db()
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return view(*args, **kwargs)
+    return wrapped
 
 
 def current_user():
-    uid = session.get("user_id")
-    if not uid:
+    if 'user_id' not in session:
         return None
-    with db() as conn:
-        return conn.execute("SELECT id, name, email, role FROM users WHERE id = ?", (uid,)).fetchone()
+    with get_db() as db:
+        return db.execute('SELECT * FROM users WHERE id=?', (session['user_id'],)).fetchone()
 
 
-def login_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        if not current_user():
-            return jsonify({"ok": False, "error": "Please sign in first."}), 401
-        return fn(*args, **kwargs)
-    return wrapper
-
-
-@app.route("/")
+@app.route('/')
 def index():
-    return render_template("index.html", app_name=APP_NAME, user=current_user())
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+    feature_count = sum(len(v) for v in TOOL_CATEGORIES.values())
+    return render_template('index.html', app_name=APP_NAME, feature_count=feature_count, categories=TOOL_CATEGORIES)
 
 
-@app.post("/api/signup")
+@app.route('/signup', methods=['GET','POST'])
 def signup():
-    data = request.get_json(force=True)
-    name = normalize_text(data.get("name", ""))
-    email = normalize_text(data.get("email", "")).lower()
-    password = data.get("password", "")
-    if len(name) < 2 or "@" not in email or len(password) < 6:
-        return jsonify({"ok": False, "error": "Use a valid name, email, and a password of at least 6 characters."}), 400
-    try:
-        with db() as conn:
-            existing_count = conn.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
-            role = "admin" if existing_count == 0 else "user"
-            cur = conn.execute(
-                "INSERT INTO users (name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)",
-                (name, email, generate_password_hash(password), role, datetime.utcnow().isoformat()),
-            )
-            uid = cur.lastrowid
-            conn.execute(
-                "INSERT INTO api_settings (user_id, provider, model, api_key, updated_at) VALUES (?, ?, ?, ?, ?)",
-                (uid, os.getenv("DEFAULT_AI_PROVIDER", "gemini"), os.getenv("GEMINI_MODEL", "gemini-1.5-flash"), "", datetime.utcnow().isoformat()),
-            )
-            session["user_id"] = uid
-        return jsonify({"ok": True})
-    except sqlite3.IntegrityError:
-        return jsonify({"ok": False, "error": "This email is already registered."}), 409
+    if request.method == 'POST':
+        name = request.form.get('name','').strip()
+        email = request.form.get('email','').strip().lower()
+        password = request.form.get('password','')
+        if not name or not email or len(password) < 6:
+            flash('Please enter your name, email, and a password with at least 6 characters.', 'error')
+            return render_template('auth.html', mode='signup', app_name=APP_NAME)
+        try:
+            with get_db() as db:
+                cur = db.execute('INSERT INTO users(name,email,password_hash,created_at) VALUES(?,?,?,?)',
+                    (name, email, generate_password_hash(password), datetime.utcnow().isoformat()))
+                user_id = cur.lastrowid
+                db.execute('INSERT INTO settings(user_id) VALUES(?)', (user_id,))
+            session['user_id'] = user_id
+            return redirect(url_for('dashboard'))
+        except sqlite3.IntegrityError:
+            flash('This email already has an account. Please login instead.', 'error')
+    return render_template('auth.html', mode='signup', app_name=APP_NAME)
 
 
-@app.post("/api/login")
+@app.route('/login', methods=['GET','POST'])
 def login():
-    data = request.get_json(force=True)
-    email = normalize_text(data.get("email", "")).lower()
-    password = data.get("password", "")
-    with db() as conn:
-        user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
-    if not user or not check_password_hash(user["password_hash"], password):
-        return jsonify({"ok": False, "error": "Incorrect email or password."}), 401
-    session["user_id"] = user["id"]
-    return jsonify({"ok": True})
+    if request.method == 'POST':
+        email = request.form.get('email','').strip().lower()
+        password = request.form.get('password','')
+        with get_db() as db:
+            user = db.execute('SELECT * FROM users WHERE email=?', (email,)).fetchone()
+        if user and check_password_hash(user['password_hash'], password):
+            session['user_id'] = user['id']
+            return redirect(url_for('dashboard'))
+        flash('Invalid email or password.', 'error')
+    return render_template('auth.html', mode='login', app_name=APP_NAME)
 
 
-@app.post("/api/logout")
+@app.route('/logout')
 def logout():
     session.clear()
-    return jsonify({"ok": True})
+    return redirect(url_for('index'))
 
 
-@app.get("/api/me")
-def me():
-    user = current_user()
-    if not user:
-        return jsonify({"ok": True, "user": None})
-    return jsonify({"ok": True, "user": dict(user)})
-
-
-@app.get("/api/settings")
+@app.route('/dashboard')
 @login_required
-def get_settings():
+def dashboard():
     user = current_user()
-    with db() as conn:
-        row = conn.execute("SELECT provider, model, api_key FROM api_settings WHERE user_id = ?", (user["id"],)).fetchone()
-    if not row:
-        return jsonify({"ok": True, "settings": {"provider": "gemini", "model": "gemini-1.5-flash", "has_key": False}})
-    return jsonify({
-        "ok": True,
-        "settings": {
-            "provider": row["provider"],
-            "model": row["model"],
-            "has_key": bool(row["api_key"]),
-            "masked_key": (row["api_key"][:6] + "..." + row["api_key"][-4:]) if row["api_key"] else "",
-        },
-    })
+    with get_db() as db:
+        settings = db.execute('SELECT * FROM settings WHERE user_id=?', (session['user_id'],)).fetchone()
+        history = db.execute('SELECT * FROM history WHERE user_id=? ORDER BY id DESC LIMIT 12', (session['user_id'],)).fetchall()
+    tools = {cat: [{'id': tid, 'name': TOOL_INFO[tid][0], 'description': TOOL_INFO[tid][1]} for tid in ids] for cat, ids in TOOL_CATEGORIES.items()}
+    first_tool = TOOL_CATEGORIES['Smart Writing'][0]
+    return render_template('dashboard.html', app_name=APP_NAME, user=user, tools=tools, tool_info=TOOL_INFO, first_tool=first_tool, history=history, settings=settings)
 
 
-@app.post("/api/settings")
+@app.post('/api/process')
 @login_required
-def save_settings():
-    user = current_user()
-    data = request.get_json(force=True)
-    provider = (data.get("provider") or "gemini").lower()
-    if provider not in {"gemini", "openai"}:
-        provider = "gemini"
-    model = normalize_text(data.get("model") or ("gemini-1.5-flash" if provider == "gemini" else "gpt-4o-mini"))
-    api_key = (data.get("api_key") or "").strip()
-    with db() as conn:
-        old = conn.execute("SELECT api_key FROM api_settings WHERE user_id = ?", (user["id"],)).fetchone()
-        if not api_key and old:
-            api_key = old["api_key"]
-        conn.execute(
-            "INSERT INTO api_settings (user_id, provider, model, api_key, updated_at) VALUES (?, ?, ?, ?, ?) "
-            "ON CONFLICT(user_id) DO UPDATE SET provider=excluded.provider, model=excluded.model, api_key=excluded.api_key, updated_at=excluded.updated_at",
-            (user["id"], provider, model, api_key, datetime.utcnow().isoformat()),
-        )
-    return jsonify({"ok": True, "message": "Settings saved."})
+def api_process():
+    data = request.get_json(force=True, silent=True) or {}
+    tool_id = data.get('tool_id', 'humanizer')
+    text = data.get('text', '')
+    params = data.get('params', {}) or {}
+    output = process_tool(tool_id, text, params)
+    stats = metrics(text, output)
+    if data.get('save', True):
+        with get_db() as db:
+            db.execute('INSERT INTO history(user_id,tool_id,input_text,output_text,stats_json,created_at) VALUES(?,?,?,?,?,?)',
+                (session['user_id'], tool_id, text[:10000], output[:15000], json.dumps(stats), datetime.utcnow().isoformat()))
+    return jsonify({'ok': True, 'output': output, 'stats': stats, 'tool': TOOL_INFO.get(tool_id, [tool_id])[0]})
 
 
-@app.post("/api/tool")
+@app.post('/api/upload')
 @login_required
-def run_tool():
-    user = current_user()
-    data = request.get_json(force=True)
-    text = normalize_text(data.get("text", ""))
-    tool = data.get("tool", "algorithm_rewriter")
-    tone = data.get("tone", "professional")
-    strength = data.get("strength", "maximum")
-
-    if len(text) < 2:
-        return jsonify({"ok": False, "error": "Please enter text first."}), 400
-    if len(text) > 12000:
-        return jsonify({"ok": False, "error": "Please keep text under 12,000 characters per request."}), 400
-
-    note = "Processed successfully."
-    if tool == "ai_rewriter":
-        with db() as conn:
-            row = conn.execute("SELECT provider, model, api_key FROM api_settings WHERE user_id = ?", (user["id"],)).fetchone()
-        settings = dict(row) if row else {}
-        output, note = rewrite_with_ai(text, tone=tone, strength=strength, user_settings=settings)
-    else:
-        output = process_tool(tool, text, tone=tone, strength=strength)
-
-    # Never return identical output for rewriting tools.
-    if tool in {"algorithm_rewriter", "ai_rewriter", "ai_style_cleaner", "product_rewriter"} and output.strip().lower() == text.strip().lower():
-        output = process_tool("algorithm_rewriter", text, tone=tone, strength="maximum")
-        note = "The first output was too similar, so a stronger rewrite was applied."
-
-    score = metrics(text, output)
-    with db() as conn:
-        conn.execute(
-            "INSERT INTO history (user_id, tool, tone, strength, input_text, output_text, score_similarity, score_lift, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (user["id"], tool, tone, strength, text, output, score["similarity"], score["originality_lift"], datetime.utcnow().isoformat()),
-        )
-    return jsonify({"ok": True, "output": output, "metrics": score, "note": note})
+def api_upload():
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'ok': False, 'error': 'No file uploaded.'}), 400
+    filename = secure_filename(file.filename or 'upload.txt')
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in UPLOAD_EXTENSIONS:
+        return jsonify({'ok': False, 'error': 'Supported files: TXT, MD, DOCX, PDF.'}), 400
+    raw = file.read()
+    try:
+        text = extract_text_from_upload(raw, ext)
+        return jsonify({'ok': True, 'filename': filename, 'text': text})
+    except Exception as exc:
+        return jsonify({'ok': False, 'error': f'Could not read file: {exc}'}), 500
 
 
-@app.get("/api/history")
+def extract_text_from_upload(raw, ext):
+    if ext in ('.txt', '.md'):
+        try:
+            return raw.decode('utf-8')
+        except UnicodeDecodeError:
+            return raw.decode('latin-1', errors='ignore')
+    if ext == '.docx':
+        from docx import Document
+        doc = Document(io.BytesIO(raw))
+        return '\n'.join(p.text for p in doc.paragraphs if p.text.strip())
+    if ext == '.pdf':
+        from pypdf import PdfReader
+        reader = PdfReader(io.BytesIO(raw))
+        pages = []
+        for page in reader.pages:
+            pages.append(page.extract_text() or '')
+        return '\n\n'.join(pages).strip()
+    return ''
+
+
+@app.post('/api/export')
 @login_required
-def history():
-    user = current_user()
-    with db() as conn:
-        rows = conn.execute(
-            "SELECT id, tool, tone, strength, substr(input_text, 1, 160) AS input_preview, substr(output_text, 1, 160) AS output_preview, score_similarity, score_lift, created_at "
-            "FROM history WHERE user_id = ? ORDER BY id DESC LIMIT 30",
-            (user["id"],),
-        ).fetchall()
-    return jsonify({"ok": True, "history": [dict(r) for r in rows]})
+def api_export():
+    data = request.get_json(force=True, silent=True) or {}
+    text = data.get('text','')
+    fmt = data.get('format','txt').lower()
+    title = data.get('title','TextForge Output')
+    safe_title = ''.join(c for c in title if c.isalnum() or c in (' ','_','-')).strip()[:40] or 'textforge-output'
+    if fmt == 'txt':
+        bio = io.BytesIO(text.encode('utf-8'))
+        return send_file(bio, as_attachment=True, download_name=f'{safe_title}.txt', mimetype='text/plain')
+    if fmt == 'md':
+        bio = io.BytesIO(text.encode('utf-8'))
+        return send_file(bio, as_attachment=True, download_name=f'{safe_title}.md', mimetype='text/markdown')
+    if fmt == 'docx':
+        from docx import Document
+        doc = Document()
+        doc.add_heading(title, 0)
+        for para in text.split('\n'):
+            if para.strip().startswith('# '):
+                doc.add_heading(para.strip('# ').strip(), level=1)
+            elif para.strip().startswith('## '):
+                doc.add_heading(para.strip('# ').strip(), level=2)
+            elif para.strip().startswith('- '):
+                doc.add_paragraph(para.strip()[2:], style='List Bullet')
+            else:
+                doc.add_paragraph(para)
+        bio = io.BytesIO()
+        doc.save(bio)
+        bio.seek(0)
+        return send_file(bio, as_attachment=True, download_name=f'{safe_title}.docx', mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    if fmt == 'pdf':
+        from reportlab.lib.pagesizes import A4
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.units import inch
+        bio = io.BytesIO()
+        doc = SimpleDocTemplate(bio, pagesize=A4, rightMargin=0.6*inch, leftMargin=0.6*inch, topMargin=0.6*inch, bottomMargin=0.6*inch)
+        styles = getSampleStyleSheet()
+        story = [Paragraph(title, styles['Title']), Spacer(1, 12)]
+        escaped = (text.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;'))
+        for para in escaped.split('\n'):
+            story.append(Paragraph(para if para.strip() else ' ', styles['BodyText']))
+            story.append(Spacer(1, 6))
+        doc.build(story)
+        bio.seek(0)
+        return send_file(bio, as_attachment=True, download_name=f'{safe_title}.pdf', mimetype='application/pdf')
+    return jsonify({'ok': False, 'error': 'Unsupported export format.'}), 400
 
 
-@app.post("/api/history/clear")
+@app.get('/api/history/<int:item_id>')
 @login_required
-def clear_history():
-    user = current_user()
-    with db() as conn:
-        conn.execute("DELETE FROM history WHERE user_id = ?", (user["id"],))
-    return jsonify({"ok": True})
+def api_history_item(item_id):
+    with get_db() as db:
+        item = db.execute('SELECT * FROM history WHERE id=? AND user_id=?', (item_id, session['user_id'])).fetchone()
+    if not item:
+        return jsonify({'ok': False, 'error': 'Not found'}), 404
+    return jsonify({'ok': True, 'item': dict(item)})
 
 
-@app.get("/health")
-def health():
-    return jsonify({"ok": True, "app": APP_NAME})
+@app.post('/api/settings')
+@login_required
+def api_settings():
+    data = request.get_json(force=True, silent=True) or {}
+    tone = data.get('default_tone','professional')
+    strength = data.get('default_strength','strong')
+    brand = data.get('brand_name', APP_NAME)[:60]
+    with get_db() as db:
+        db.execute('UPDATE settings SET default_tone=?, default_strength=?, brand_name=? WHERE user_id=?',
+                   (tone, strength, brand, session['user_id']))
+    return jsonify({'ok': True})
 
 
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", "5000"))
-    app.run(host="0.0.0.0", port=port, debug=True)
+@app.post('/api/clear-history')
+@login_required
+def api_clear_history():
+    with get_db() as db:
+        db.execute('DELETE FROM history WHERE user_id=?', (session['user_id'],))
+    return jsonify({'ok': True})
+
+
+if __name__ == '__main__':
+    init_db()
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=os.getenv('FLASK_DEBUG','1') == '1')

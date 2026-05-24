@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-bg">
+  <div class="auth-card premium-card">
+    <a href="{{ url_for('index') }}" class="brand brand-full auth-brand">
+      <img class="logo-img" src="{{ url_for('static', filename='assets/logo.svg') }}" alt="{{ app_name }} logo">
+      <span>{{ app_name }}</span>
+    </a>
+    <h1>{{ 'Create your account' if mode == 'signup' else 'Welcome back' }}</h1>
+    <p>{{ 'Start using the complete writing workspace.' if mode == 'signup' else 'Login to open your dashboard.' }}</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}<div class="alert {{ category }}">{{ msg }}</div>{% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post" class="auth-form">
+      {% if mode == 'signup' %}
+      <label>Full name<input name="name" placeholder="Your name" required></label>
+      {% endif %}
+      <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
+      <label>Password<input type="password" name="password" placeholder="Minimum 6 characters" required></label>
+      <button class="btn btn-primary btn-full" type="submit">{{ 'Sign up' if mode == 'signup' else 'Login' }}</button>
+    </form>
+    <p class="auth-switch">
+      {% if mode == 'signup' %}Already have an account? <a href="{{ url_for('login') }}">Login</a>{% else %}New here? <a href="{{ url_for('signup') }}">Create account</a>{% endif %}
+    </p>
+  </div>
+</div>
+{% endblock %}

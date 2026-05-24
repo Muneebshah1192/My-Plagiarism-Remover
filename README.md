@@ -1,66 +1,43 @@
-# Originality Studio Pro
+# TextForge Studio — Professional No-API Text Tools Website
 
-A professional Python web app for text rewriting, grammar polishing, AI-style cleanup, product copy rewriting, summaries, bullet points, titles, keyword extraction, and bias-aware wording cleanup.
+Made by **Muneeb Haider**
 
-## Main features
+TextForge Studio is a platform-neutral Python Flask web application for rewriting, polishing, analyzing, and exporting text. It is designed as a complete writing workspace that can be deployed on any Python-friendly hosting platform or run locally.
 
-- User signup and login
-- Dashboard with multiple working text tools
-- Algorithm Rewriter that works without any API key
-- AI Rewrite Assist with optional Gemini or OpenAI API key
-- API settings from the three-dot menu in the dashboard
-- History panel for recent generations
-- TXT/MD upload
-- TXT download
-- Similarity estimate, originality lift, phrase overlap, readability score
-- SQLite database included automatically
-- Clean Python backend and premium responsive UI
+## What's New in This Version
 
-## Tools included
+- Professional non-neon UI with a cleaner SaaS-style layout
+- Logo integrated across landing page, login, and dashboard
+- Responsive design for desktop, tablet, and mobile
+- Collapsible sidebar for a cleaner workspace
+- Dark mode / light mode toggle
+- Improved spacing, contrast, buttons, cards, and analytics panel
+- Output area now has a separate tinted background
+- Faster front-end status feedback with response time display
+- Tool search and category navigation improvements
+- 99 working text tools organized by category
+- Stronger rewriting behavior for product-title and keyword-heavy text
+- PDF, DOCX, TXT, and Markdown export
+- TXT, MD, PDF, and DOCX import
 
-1. Algorithm Rewriter
-2. AI Rewrite Assist
-3. AI-Style Cleaner
-4. Grammar & Punctuation Polish
-5. Bias Cleaner
-6. Product Description Rewriter
-7. Smart Summarizer
-8. Text Expander
-9. Bullet Point Generator
-10. Title Generator
-11. Keyword Extractor
+## Included Categories
 
-## Important note
+- Smart Writing
+- Content Intelligence
+- SEO & Blogging
+- Student Tools
+- Business Tools
+- Social Media
+- Document Tools
 
-This app rewrites and improves text, but no tool can honestly guarantee perfect originality or check every source on the internet. Users should add citations when the original idea, fact, or research belongs to another source.
+## Important Note
 
-## Local setup
+This project uses local Python logic and does not require external AI APIs. Because it does not connect to a web plagiarism database, it should be marketed as an originality assistant, rewriting workspace, or text transformation toolkit rather than a guaranteed plagiarism remover.
 
-```bash
-python -m venv venv
-```
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-Mac/Linux:
-
-```bash
-source venv/bin/activate
-```
-
-Install requirements:
+## Run Locally
 
 ```bash
 pip install -r requirements.txt
-```
-
-Run:
-
-```bash
 python app.py
 ```
 
@@ -70,68 +47,27 @@ Open:
 http://127.0.0.1:5000
 ```
 
-## Production run
+## Production Start Command
 
 ```bash
 gunicorn app:app
 ```
 
-## Environment variables
+## Files
 
-Create a `.env` file using `.env.example` as a guide.
+- `app.py` — Flask backend, login, upload/export routes, history, settings
+- `text_engine.py` — all local text-processing algorithms and tool logic
+- `templates/` — HTML pages
+- `static/style.css` — complete professional responsive styling
+- `static/app.js` — dashboard interactions, dark mode, sidebar collapse, tool execution
+- `static/assets/logo.svg` — integrated website logo
 
-Required for production:
+## Customizing the Logo
 
-```env
-SECRET_KEY=your-long-random-secret-key
-```
-
-Optional AI keys:
-
-```env
-GEMINI_API_KEY=your-key
-OPENAI_API_KEY=your-key
-DEFAULT_AI_PROVIDER=gemini
-GEMINI_MODEL=gemini-1.5-flash
-OPENAI_MODEL=gpt-4o-mini
-```
-
-Users can also add their own API key from the app's three-dot settings menu.
-
-## Deploying from GitHub
-
-This is a Python Flask application. Deploy it on any host that supports Python web apps, WSGI/Gunicorn, or Docker.
-
-Common build/start settings:
+Replace this file with your own logo if needed:
 
 ```text
-Install command: pip install -r requirements.txt
-Start command: gunicorn app:app
+static/assets/logo.svg
 ```
 
-For Docker hosting, use the included `Dockerfile`.
-
-## First user becomes admin
-
-The first account created in the app receives the `admin` role. Later users receive the `user` role.
-
-## Custom branding
-
-You can change app name in `.env`:
-
-```env
-APP_NAME=Your Brand Name
-```
-
-You can edit styles in:
-
-```text
-static/css/styles.css
-```
-
-You can edit tools and algorithms in:
-
-```text
-core/rewrite_engine.py
-core/ai_clients.py
-```
+Keep the same filename to update the logo everywhere automatically.

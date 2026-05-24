@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="app-shell" data-default-strength="{{ settings['default_strength'] if settings else 'strong' }}" data-default-tone="{{ settings['default_tone'] if settings else 'professional' }}">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <a href="{{ url_for('dashboard') }}" class="brand brand-full side-brand">
+        <img class="logo-img" src="{{ url_for('static', filename='assets/logo.svg') }}" alt="{{ app_name }} logo">
+        <span>{{ settings['brand_name'] if settings else app_name }}</span>
+      </a>
+      <button class="icon-btn mobile-close" id="closeSidebar" title="Close sidebar">×</button>
+      <button class="icon-btn collapse-btn" id="collapseSidebar" title="Collapse sidebar">‹</button>
+    </div>
+
+    <div class="search-box"><input id="toolSearch" placeholder="Search tools, templates, reports..."></div>
+
+    <nav class="cat-list" id="categoryList" aria-label="Tool categories">
+      {% for cat, items in tools.items() %}
+        <button class="cat-btn {% if loop.first %}active{% endif %}" data-category="{{ cat }}" title="{{ cat }}">
+          <span class="cat-letter">{{ cat[:1] }}</span>
+          <span class="cat-name">{{ cat }}</span>
+          <small>{{ items|length }}</small>
+        </button>
+      {% endfor %}
+    </nav>
+
+    <div class="side-footer">
+      <strong>Local workspace</strong>
+      <p>No external API required. Files and text are processed by your Python backend.</p>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar glass-bar">
+      <button class="hamburger icon-btn" id="openSidebar" title="Open sidebar">☰</button>
+      <div class="top-title">
+        <span class="label">Dashboard</span>
+        <h1>Writing Workspace</h1>
+        <p>Welcome, {{ user['name'] }}. Choose a tool, paste text, and create polished output.</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-muted" id="themeToggle" title="Toggle theme">🌙 Theme</button>
+        <button class="btn btn-muted" id="historyToggle">History</button>
+        <div class="menu-wrap">
+          <button class="dots-btn" id="settingsToggle" title="Settings">•••</button>
+          <div class="settings-pop" id="settingsPop">
+            <h3>Workspace Settings</h3>
+            <label>Default tone
+              <select id="settingsTone">
+                <option value="professional">Professional</option>
+                <option value="friendly">Friendly</option>
+                <option value="academic">Academic</option>
+                <option value="persuasive">Persuasive</option>
+                <option value="simple">Simple</option>
+              </select>
+            </label>
+            <label>Default rewrite strength
+              <select id="settingsStrength">
+                <option value="light">Light</option>
+                <option value="balanced">Balanced</option>
+                <option value="strong">Strong</option>
+                <option value="maximum">Maximum</option>
+              </select>
+            </label>
+            <label>Brand name
+              <input id="settingsBrand" value="{{ settings['brand_name'] if settings else app_name }}">
+            </label>
+            <button class="btn btn-primary btn-full" id="saveSettings">Save settings</button>
+            <button class="btn btn-ghost btn-full" id="clearHistory">Clear history</button>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-full">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="summary-grid">
+      <div class="summary-card"><span>Tools</span><strong>{{ tool_info|length }}</strong><small>working modules</small></div>
+      <div class="summary-card"><span>Exports</span><strong>4</strong><small>TXT, MD, DOCX, PDF</small></div>
+      <div class="summary-card"><span>Mode</span><strong>No API</strong><small>Python processing</small></div>
+    </section>
+
+    <section class="tool-strip premium-card">
+      {% for cat, items in tools.items() %}
+      <div class="tool-group {% if loop.first %}active{% endif %}" data-category="{{ cat }}">
+        {% for tool in items %}
+        <button class="tool-pill {% if loop.first and cat == 'Smart Writing' %}active{% endif %}" data-tool="{{ tool.id }}" data-name="{{ tool.name }}" data-description="{{ tool.description }}">
+          {{ tool.name }}
+        </button>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </section>
+
+    <section class="editor-layout">
+      <div class="main-panel premium-card">
+        <div class="panel-header">
+          <div>
+            <span class="label">Selected tool</span>
+            <h2 id="selectedToolName">AI Humanizer</h2>
+            <p id="selectedToolDesc">Rewrite robotic text into a more natural, human-style draft.</p>
+          </div>
+          <div class="control-row compact">
+            <label>Tone<select id="toneSelect">
+              <option value="professional">Professional</option>
+              <option value="friendly">Friendly</option>
+              <option value="academic">Academic</option>
+              <option value="persuasive">Persuasive</option>
+              <option value="simple">Simple</option>
+            </select></label>
+            <label>Strength<select id="strengthSelect">
+              <option value="light">Light</option>
+              <option value="balanced">Balanced</option>
+              <option value="strong">Strong</option>
+              <option value="maximum">Maximum</option>
+            </select></label>
+            <label>Case<select id="caseSelect">
+              <option value="title">Title Case</option>
+              <option value="sentence">Sentence case</option>
+              <option value="upper">UPPER CASE</option>
+              <option value="lower">lower case</option>
+            </select></label>
+          </div>
+        </div>
+
+        <div class="io-grid">
+          <div class="text-card input-card">
+            <div class="text-card-head">
+              <h3>Input</h3>
+              <div>
+                <label class="mini file-label" title="Upload document">Upload<input type="file" id="fileUpload" accept=".txt,.md,.docx,.pdf"></label>
+                <button class="mini" id="sampleBtn" title="Insert sample text">Sample</button>
+                <button class="mini" id="clearInput" title="Clear both boxes">Clear</button>
+              </div>
+            </div>
+            <textarea id="inputText" placeholder="Paste your text here. You can also upload TXT, MD, DOCX, or PDF files."></textarea>
+          </div>
+          <div class="text-card output-card">
+            <div class="text-card-head">
+              <h3>Output</h3>
+              <div>
+                <button class="mini" id="copyOutput" title="Copy result">Copy</button>
+                <button class="mini" id="useAsInput" title="Move output to input">Use as input</button>
+              </div>
+            </div>
+            <textarea id="outputText" placeholder="Your polished result will appear here."></textarea>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-primary btn-run" id="runTool">Run Tool</button>
+          <button class="btn btn-muted" id="compareBtn">Refresh Analytics</button>
+          <div class="export-wrap">
+            <select id="exportFormat"><option value="txt">TXT</option><option value="md">Markdown</option><option value="docx">MS Word DOCX</option><option value="pdf">PDF</option></select>
+            <button class="btn btn-muted" id="exportBtn">Export</button>
+          </div>
+          <span class="status" id="statusText"></span>
+        </div>
+      </div>
+
+      <aside class="analytics-panel">
+        <div class="analytics-card premium-card">
+          <h3>Writing Analytics</h3>
+          <div class="metric"><span>Similarity</span><strong id="mSimilarity">0%</strong></div>
+          <div class="bar"><i id="barSimilarity"></i></div>
+          <div class="metric"><span>Originality lift</span><strong id="mLift">0%</strong></div>
+          <div class="bar"><i id="barLift"></i></div>
+          <div class="metric"><span>Phrase overlap</span><strong id="mPhrase">0%</strong></div>
+          <div class="bar"><i id="barPhrase"></i></div>
+          <div class="metric"><span>Readability</span><strong id="mReadability">0</strong></div>
+          <div class="bar"><i id="barReadability"></i></div>
+          <div class="stats-grid">
+            <span><b id="mWords">0</b> Words</span><span><b id="mSentences">0</b> Sentences</span><span><b id="mReading">0</b> Min read</span><span><b id="mChars">0</b> Chars</span>
+          </div>
+        </div>
+        <div class="analytics-card tips premium-card">
+          <h3>Professional Tips</h3>
+          <p>Use <b>Maximum</b> for stronger rewriting, <b>Professional</b> for business copy, and <b>Simple</b> for easier reading. Export final work as PDF or DOCX.</p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <aside class="history-panel" id="historyPanel">
+    <div class="history-head"><h2>Recent Work</h2><button id="closeHistory">×</button></div>
+    <div class="history-list">
+      {% for item in history %}
+      <button class="history-item" data-id="{{ item['id'] }}">
+        <strong>{{ tool_info[item['tool_id']][0] if item['tool_id'] in tool_info else item['tool_id'] }}</strong>
+        <span>{{ item['created_at'][:16].replace('T',' ') }}</span>
+        <p>{{ item['output_text'][:120] }}...</p>
+      </button>
+      {% else %}
+      <p class="empty-history">No saved history yet.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+
+<script id="toolData" type="application/json">{{ tools|tojson }}</script>
+{% endblock %}
