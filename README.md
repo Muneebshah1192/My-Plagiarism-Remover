@@ -107,13 +107,6 @@ This version separates the workspace into professional pages:
 
 The main navigation includes a **Tools** dropdown that shows every category. Users choose a category first, then choose a tool, then work on a focused tool page instead of seeing everything on one crowded dashboard.
 
-## Admin access
-Admin login remains:
-
-- Email: `muneebshah1192@gmail.com`
-- Password: `Muneebshah1192@theadmin.com`
-
-Change the admin password and `SECRET_KEY` before publishing.
 
 ## Bright UI + Payment Patch
 This build fixes the latest visual issues by replacing the previous heavy dashboard styling with a clearer light-blue/white gradient interface by default. Text contrast, card spacing, tool cards, pricing, subscription, admin pages, editor textareas, settings dropdowns, and mobile responsiveness were improved.
