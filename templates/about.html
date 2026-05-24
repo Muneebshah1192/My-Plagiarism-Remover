@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="legal-page">
+  <article class="legal-card card-soft">
+    <span class="eyebrow">About</span>
+    <h1>About {{ app_name }}</h1>
+    <p>{{ app_name }} is a professional no-API Python writing workspace created to help users rewrite, analyze, format, and export text from one clean dashboard. The platform includes tools for AI humanizing, originality support, prompt writing, SEO, student work, business documents, social media content, and document exports.</p>
+    <div class="info-grid">
+      <div><span>Created by</span><strong>{{ owner_name }}</strong></div>
+      <div><span>Created on</span><strong>{{ project_created_at }}</strong></div>
+      <div><span>Contact number</span><strong>{{ owner_phone }}</strong></div>
+      <div><span>Email</span><strong>{{ owner_email }}</strong></div>
+    </div>
+    <h2>What the website includes</h2>
+    <ul class="clean-list">
+      <li>AI Humanizer and originality support tools</li>
+      <li>Prompt generator and prompt improver</li>
+      <li>SEO title, meta description, FAQ, slug, and keyword tools</li>
+      <li>Student tools for notes, MCQs, definitions, flashcards, and essays</li>
+      <li>Business tools for emails, proposals, meeting notes, support replies, and resumes</li>
+      <li>Social media tools for hooks, captions, scripts, hashtags, and CTAs</li>
+      <li>Document import and export for TXT, Markdown, DOCX, and PDF</li>
+    </ul>
+  </article>
+</main>
+{% endblock %}

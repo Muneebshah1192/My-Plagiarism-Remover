@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-hero compact-hero">
+  <div class="hero-copy">
+    <div class="breadcrumb"><a href="{{ url_for('tools_home') }}">Tools</a><span>/</span><b>{{ selected_category }}</b></div>
+    <span class="eyebrow">Selected Category</span>
+    <h1>{{ selected_category }}</h1>
+    <p>{{ category_description }}</p>
+    <div class="hero-actions">
+      <a class="btn btn-muted" href="{{ url_for('tools_home') }}">← All categories</a>
+      <a class="btn btn-primary" href="{{ url_for('tool_page', tool_id=tools[selected_category][0].id) }}">Start first tool</a>
+    </div>
+  </div>
+  <div class="hero-stat-panel slim">
+    <div><span>Available</span><strong>{{ tools[selected_category]|length }}</strong><small>tools</small></div>
+    <div><span>Plan</span><strong>{{ user_plan.name|title }}</strong><small>{{ usage_used|int }} / {{ usage_limit|int }} chars</small></div>
+  </div>
+</section>
+
+<section class="tool-category-section">
+  <div class="section-head split-head">
+    <div><span class="eyebrow">Tool Library</span><h2>Pick one tool</h2><p>Every tool opens on a separate focused page with input, output, controls, analytics, and export.</p></div>
+    <div class="search-box standalone"><input id="categoryToolSearch" placeholder="Search in {{ selected_category }}..."></div>
+  </div>
+  <div class="tool-grid-page" id="categoryToolGrid">
+    {% for tool in tools[selected_category] %}
+    <a class="tool-page-card" href="{{ url_for('tool_page', tool_id=tool.id) }}" data-name="{{ tool.name|lower }}" data-description="{{ tool.description|lower }}">
+      <div class="tool-number">{{ loop.index }}</div>
+      <div class="tool-main-text">
+        <h3>{{ tool.name }} {% if tool.premium %}<em>PRO</em>{% endif %}</h3>
+        <p>{{ tool.description }}</p>
+      </div>
+      <span class="open-arrow">Open →</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+<script>
+  (function(){
+    const search = document.getElementById('categoryToolSearch');
+    if(!search) return;
+    search.addEventListener('input', function(){
+      const q = this.value.toLowerCase().trim();
+      document.querySelectorAll('.tool-page-card').forEach(card=>{
+        const visible = !q || card.dataset.name.includes(q) || card.dataset.description.includes(q);
+        card.style.display = visible ? '' : 'none';
+      });
+    });
+  })();
+</script>
+{% endblock %}

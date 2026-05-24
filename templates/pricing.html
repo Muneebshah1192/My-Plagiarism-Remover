@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="pricing-page">
+  <section class="pricing-hero card-soft">
+    <span class="eyebrow">Pricing</span>
+    <h1>Start free, upgrade when your writing workload grows.</h1>
+    <p>Use the built-in algorithm tools for free within daily limits. Premium unlocks higher limits, premium workflows, and Gemini API mode with your own API key.</p>
+  </section>
+  <section class="pricing-grid">
+    <div class="price-card card-soft">
+      <span class="plan-tag">Free</span>
+      <h2>$0</h2>
+      <p>For testing the workspace and using basic tools.</p>
+      <ul><li>{{ settings.get('free_daily_chars','4000') }} characters/day</li><li>Algorithm mode</li><li>Basic text tools</li><li>TXT/MD export</li></ul>
+      <a class="btn btn-muted btn-full" href="{{ url_for('signup') }}">Create Free Account</a>
+    </div>
+    <div class="price-card featured card-soft">
+      <span class="plan-tag">Pro</span>
+      <h2>${{ settings.get('plan_price_usd','5') }} <small>/ month</small></h2>
+      <p>For students, marketers, freelancers, and creators who need more power.</p>
+      <ul><li>{{ settings.get('premium_daily_chars','100000') }} characters/day</li><li>Premium tools unlocked</li><li>Gemini API mode with own key</li><li>PDF/DOCX export</li><li>History and analytics</li></ul>
+      {% if current_user %}<a class="btn btn-primary btn-full" href="{{ url_for('subscribe') }}">Upgrade Now</a>{% else %}<a class="btn btn-primary btn-full" href="{{ url_for('signup') }}">Start Trial</a>{% endif %}
+    </div>
+    <div class="price-card card-soft">
+      <span class="plan-tag">Trial</span>
+      <h2>{{ settings.get('trial_days','1') }} day</h2>
+      <p>New users get a short trial to test premium features before subscribing.</p>
+      <ul><li>{{ settings.get('trial_daily_chars','20000') }} characters/day</li><li>Try premium workflows</li><li>Test API mode with your own key</li><li>No card required for signup</li></ul>
+      <a class="btn btn-secondary btn-full" href="{{ url_for('signup') }}">Start Trial</a>
+    </div>
+  </section>
+</main>
+{% endblock %}

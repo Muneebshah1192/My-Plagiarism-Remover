@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="legal-page"><section class="legal-card card-soft"><span class="eyebrow">Writing Guides</span><h1>Helpful Writing and SEO Guides</h1><p>These guides add useful reader-focused content to the website and explain how to use writing tools responsibly.</p><div class="guide-grid page-guides">{% for slug, guide in guides.items() %}<a class="guide-card" href="{{ url_for('guide_detail', slug=slug) }}"><h3>{{ guide.title }}</h3><p>{{ guide.description }}</p><span>Open guide →</span></a>{% endfor %}</div></section></main>
+{% endblock %}

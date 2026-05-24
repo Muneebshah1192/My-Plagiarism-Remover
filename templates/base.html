@@ -3,23 +3,89 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ app_name }}</title>
-  <link rel="icon" href="{{ url_for('static', filename='assets/favicon.svg') }}" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="description" content="TextForge Studio is a professional writing workspace with rewriting, prompt generation, SEO, student, business, social media tools, subscriptions, and hybrid algorithm/API writing modes.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="{{ title if title else app_name }}">
+  <meta property="og:description" content="Professional text tools for writing, rewriting, SEO, study, business, and content workflows.">
+  <meta property="og:type" content="website">
+  <title>{{ title if title else app_name }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='assets/favicon.svg') }}">
   <script>
-    (function(){
-      try{
-        var theme = localStorage.getItem('textforge-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-      }catch(e){}
-    })();
+    (function(){try{var t=localStorage.getItem('textforge-theme-v4')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
   </script>
+  {% if ads_enabled and site_settings.get('adsense_head_script') %}
+  {{ site_settings.get('adsense_head_script')|safe }}
+  {% endif %}
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  {% block content %}{% endblock %}
+  {% block body %}
+  <div class="site-frame">
+    <header class="public-nav">
+      <a class="brand" href="{{ url_for('index') }}">
+        <img class="logo-img" src="{{ url_for('static', filename='assets/logo.png') }}" alt="{{ app_name }} logo">
+        <span>{{ app_name }}</span>
+      </a>
+      <button class="nav-toggle" id="publicNavToggle" aria-label="Open navigation">☰</button>
+      <nav class="public-links" id="publicLinks">
+        <a href="{{ url_for('index') }}">Home</a>
+        <div class="nav-dropdown">
+          <a href="{{ url_for('tools_home') if current_user else url_for('login') }}" class="nav-drop-trigger">Tools ▾</a>
+          <div class="nav-drop-menu">
+            {% for cat, ids in nav_tool_categories.items() %}
+              <a href="{{ url_for('tool_category', category_slug=cat_slug(cat)) if current_user else url_for('login') }}">
+                <span>{{ cat }}</span><small>{{ ids|length }} tools</small>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+        <a href="{{ url_for('guides') }}">Guides</a>
+        <a href="{{ url_for('pricing') }}">Pricing</a>
+        <a href="{{ url_for('about') }}">About</a>
+        <div class="nav-dropdown compact-drop">
+          <a href="{{ url_for('privacy_policy') }}" class="nav-drop-trigger">Legal ▾</a>
+          <div class="nav-drop-menu small-menu">
+            <a href="{{ url_for('privacy_policy') }}"><span>Privacy Policy</span></a>
+            <a href="{{ url_for('terms') }}"><span>Terms & Conditions</span></a>
+            <a href="{{ url_for('disclaimer') }}"><span>Disclaimer</span></a>
+          </div>
+        </div>
+        {% if current_user %}
+          {% if current_user['role'] == 'admin' %}<a href="{{ url_for('admin_panel') }}">Admin</a>{% endif %}
+          <a href="{{ url_for('tools_home') }}" class="nav-cta">Workspace</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}" class="nav-cta">Start Free</a>
+        {% endif %}
+      </nav>
+    </header>
+    {% if ads_enabled and site_settings.get('ad_header_html') %}
+      <div class="ad-container ad-header">{{ site_settings.get('ad_header_html')|safe }}</div>
+    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+        {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+    {% if ads_enabled and site_settings.get('ad_footer_html') %}
+      <div class="ad-container ad-footer">{{ site_settings.get('ad_footer_html')|safe }}</div>
+    {% endif %}
+    <footer class="site-footer">
+      <div>
+        <strong>{{ app_name }}</strong>
+        <p>Professional writing, rewriting, SEO, student, business, and social media text tools with free and premium workflows.</p>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+        <a href="{{ url_for('terms') }}">Terms</a>
+        <a href="{{ url_for('disclaimer') }}">Disclaimer</a>
+      </div>
+    </footer>
+  </div>
+  {% endblock %}
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="admin-page pro-admin">
+  <section class="admin-unlimited-note card-soft"><b>Admin mode active:</b> all premium tools and usage limits are unlocked for this account.</section>
+  <section class="admin-card card-soft">
+    <div class="admin-head">
+      <div><span class="eyebrow">Admin Only</span><h1>Admin Control Center</h1><p>Manage ads, subscription pricing, payment methods, users, and manual payment approvals.</p></div>
+      <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    </div>
+    <div class="admin-stats-grid">
+      <div><span>Total Users</span><b>{{ stats.users }}</b></div>
+      <div><span>Premium Users</span><b>{{ stats.premium }}</b></div>
+      <div><span>Pending Payments</span><b>{{ stats.pending }}</b></div>
+      <div><span>Saved Outputs</span><b>{{ stats.history }}</b></div>
+    </div>
+    <div class="admin-note"><b>Admin login:</b> {{ owner_email }} <br><b>Default password:</b> Muneebshah1192@theadmin.com <br><small>Change this password/SECRET_KEY before running a serious public website.</small></div>
+  </section>
+
+  <form method="post" class="admin-card card-soft admin-form">
+    <input type="hidden" name="action" value="save_site">
+    <h2>Subscription and usage limits</h2>
+    <div class="form-grid-four">
+      <label>Monthly price USD<input name="plan_price_usd" value="{{ settings.get('plan_price_usd','5') }}"></label>
+      <label>Trial days<input name="trial_days" value="{{ settings.get('trial_days','1') }}"></label>
+      <label>Free chars/day<input name="free_daily_chars" value="{{ settings.get('free_daily_chars','4000') }}"></label>
+      <label>Premium chars/day<input name="premium_daily_chars" value="{{ settings.get('premium_daily_chars','100000') }}"></label>
+      <label>Trial chars/day<input name="trial_daily_chars" value="{{ settings.get('trial_daily_chars','20000') }}"></label>
+      <label>Premium duration days<input name="premium_duration_days" value="{{ settings.get('premium_duration_days','30') }}"></label>
+    </div>
+    <label>Admin notice<textarea name="admin_notice" rows="3">{{ settings.get('admin_notice','') }}</textarea></label>
+
+    <h2>Payment method toggles</h2>
+    <div class="toggle-grid">
+      <label class="toggle-row"><input type="checkbox" name="enable_stripe" value="1" {% if settings.get('enable_stripe') == '1' %}checked{% endif %}> Enable Stripe</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_lemon" value="1" {% if settings.get('enable_lemon') == '1' %}checked{% endif %}> Enable Lemon Squeezy</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_paddle" value="1" {% if settings.get('enable_paddle') == '1' %}checked{% endif %}> Enable Paddle</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_paypal" value="1" {% if settings.get('enable_paypal') == '1' %}checked{% endif %}> Enable PayPal</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_payoneer" value="1" {% if settings.get('enable_payoneer') == '1' %}checked{% endif %}> Enable Payoneer</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_bank" value="1" {% if settings.get('enable_bank') == '1' %}checked{% endif %}> Enable Bank</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_easypaisa" value="1" {% if settings.get('enable_easypaisa') == '1' %}checked{% endif %}> Enable EasyPaisa</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_sadapay" value="1" {% if settings.get('enable_sadapay') == '1' %}checked{% endif %}> Enable SadaPay</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_mashreq" value="1" {% if settings.get('enable_mashreq') == '1' %}checked{% endif %}> Enable Mashreq Neo Bank</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_allied" value="1" {% if settings.get('enable_allied') == '1' %}checked{% endif %}> Enable Allied Bank</label>
+      <label class="toggle-row"><input type="checkbox" name="enable_api_mode" value="1" {% if settings.get('enable_api_mode') == '1' %}checked{% endif %}> Enable Gemini API Mode</label>
+    </div>
+    <div class="form-grid-two">
+      <label>Stripe checkout URL<input name="stripe_checkout_url" value="{{ settings.get('stripe_checkout_url','') }}" placeholder="https://buy.stripe.com/..."></label>
+      <label>Lemon Squeezy checkout URL<input name="lemon_checkout_url" value="{{ settings.get('lemon_checkout_url','') }}" placeholder="https://your-store.lemonsqueezy.com/checkout/..."></label>
+      <label>Paddle checkout URL<input name="paddle_checkout_url" value="{{ settings.get('paddle_checkout_url','') }}" placeholder="https://checkout.paddle.com/..."></label>
+      <label>EasyPaisa number<input name="easypaisa_number" value="{{ settings.get('easypaisa_number','') }}"></label>
+      <label>EasyPaisa account holder name<input name="easypaisa_name" value="{{ settings.get('easypaisa_name','') }}"></label>
+      <label>SadaPay number<input name="sadapay_number" value="{{ settings.get('sadapay_number','') }}"></label>
+      <label>SadaPay account holder name<input name="sadapay_name" value="{{ settings.get('sadapay_name','') }}"></label>
+      <label>Site domain<input name="site_domain" value="{{ settings.get('site_domain','') }}" placeholder="https://yourdomain.com"></label>
+    </div>
+    <div class="form-grid-two">
+      <label>PayPal payment details<textarea name="paypal_details" rows="5">{{ settings.get('paypal_details','') }}</textarea></label>
+      <label>Payoneer payment details<textarea name="payoneer_details" rows="5">{{ settings.get('payoneer_details','') }}</textarea></label>
+      <label>Bank account details<textarea name="bank_details" rows="5">{{ settings.get('bank_details','') }}</textarea></label>
+      <label>Mashreq Neo Bank details<textarea name="mashreq_details" rows="5">{{ settings.get('mashreq_details','') }}</textarea></label>
+      <label>Allied Bank details<textarea name="allied_details" rows="5">{{ settings.get('allied_details','') }}</textarea></label>
+    </div>
+
+    <h2>AdSense settings</h2>
+    <label class="toggle-row"><input type="checkbox" name="ads_enabled" value="1" {% if settings.get('ads_enabled') == '1' %}checked{% endif %}> Enable ads on website</label>
+    <label>AdSense publisher ID for /ads.txt<input name="ads_txt_publisher_id" value="{{ settings.get('ads_txt_publisher_id','') }}" placeholder="pub-xxxxxxxxxxxxxxxx"></label>
+    <label>AdSense global head script<textarea name="adsense_head_script" rows="5" placeholder="Paste the script Google AdSense gives you for Auto Ads.">{{ settings.get('adsense_head_script','') }}</textarea></label>
+    <div class="form-grid-two">
+      <label>Header / top banner ad HTML<textarea name="ad_header_html" rows="6">{{ settings.get('ad_header_html','') }}</textarea></label>
+      <label>Inside tool ad HTML<textarea name="ad_tool_html" rows="6">{{ settings.get('ad_tool_html','') }}</textarea></label>
+      <label>Sidebar ad HTML<textarea name="ad_sidebar_html" rows="6">{{ settings.get('ad_sidebar_html','') }}</textarea></label>
+      <label>Footer ad HTML<textarea name="ad_footer_html" rows="6">{{ settings.get('ad_footer_html','') }}</textarea></label>
+    </div>
+    <button class="btn btn-primary btn-large" type="submit">Save Admin Settings</button>
+  </form>
+
+  <section class="admin-card card-soft">
+    <h2>Payment proofs</h2>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>User</th><th>Method</th><th>Amount</th><th>Ref</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead><tbody>
+      {% for p in proofs %}
+      <tr><td>{{ p['name'] }}<br><small>{{ p['email'] }}</small></td><td>{{ p['method'] }}</td><td>{{ p['amount'] }} {{ p['currency'] }}</td><td>{{ p['transaction_ref'] }}</td><td>{% if p['screenshot_path'] %}<a href="{{ url_for('payment_proof_file', filename=p['screenshot_path']) }}" target="_blank">View</a>{% else %}-{% endif %}</td><td><span class="status-{{ p['status'] }}">{{ p['status'] }}</span></td><td>{% if p['status']=='pending' %}<form method="post" class="inline-actions"><input type="hidden" name="proof_id" value="{{ p['id'] }}"><input name="admin_note" placeholder="Admin note"><button name="action" value="approve_payment" class="btn btn-primary mini-admin">Approve</button><button name="action" value="reject_payment" class="btn btn-danger mini-admin">Reject</button></form>{% else %}{{ p['reviewed_at'][:10] }}{% endif %}</td></tr>
+      {% else %}<tr><td colspan="7">No payment proofs yet.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+
+  <section class="admin-card card-soft">
+    <h2>Users</h2>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Plan</th><th>Premium Until</th><th>Change Plan</th></tr></thead><tbody>
+      {% for u in users %}
+      <tr><td>{{ u['name'] }}</td><td>{{ u['email'] }}</td><td>{{ u['role'] }}</td><td>{{ u['plan'] }}</td><td>{{ u['premium_until'][:10] if u['premium_until'] else '-' }}</td><td><form method="post" class="inline-actions"><input type="hidden" name="action" value="update_user_plan"><input type="hidden" name="user_id" value="{{ u['id'] }}"><select name="plan"><option value="free">Free</option><option value="premium">Premium</option></select><input name="days" value="30"><button class="btn btn-secondary mini-admin">Update</button></form></td></tr>
+      {% endfor %}
+    </tbody></table></div>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="legal-page"><article class="legal-card card-soft"><span class="eyebrow">Guide</span><h1>{{ guide.title }}</h1><p class="lead-text">{{ guide.description }}</p>{% for h, p in guide.sections %}<h2>{{ h }}</h2><p>{{ p }}</p>{% endfor %}<div class="guide-cta"><a class="btn btn-primary" href="{{ url_for('signup') }}">Use the tools</a><a class="btn btn-secondary" href="{{ url_for('guides') }}">More guides</a></div></article></main>
+{% endblock %}

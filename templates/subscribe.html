@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="subscribe-page">
+  <section class="pricing-hero card-soft">
+    <span class="eyebrow">Subscription</span>
+    <h1>Upgrade to Pro</h1>
+    <p>Your current plan is <b>{{ user_plan.name|title }}</b>. Used today: <b>{{ usage_used }}</b> / <b>{{ user_plan.limit }}</b> characters.</p>
+  </section>
+
+  <section class="subscribe-grid">
+    <div class="card-soft checkout-card">
+      <h2>International checkout options</h2>
+      <p>Only methods enabled by the admin are shown here.</p>
+      <div class="payment-methods">
+        {% if settings.get('enable_stripe') == '1' and settings.get('stripe_checkout_url') %}<a class="btn btn-primary btn-full" href="{{ settings.get('stripe_checkout_url') }}" target="_blank">Pay with Stripe</a>{% endif %}
+        {% if settings.get('enable_lemon') == '1' and settings.get('lemon_checkout_url') %}<a class="btn btn-primary btn-full" href="{{ settings.get('lemon_checkout_url') }}" target="_blank">Pay with Lemon Squeezy</a>{% endif %}
+        {% if settings.get('enable_paddle') == '1' and settings.get('paddle_checkout_url') %}<a class="btn btn-primary btn-full" href="{{ settings.get('paddle_checkout_url') }}" target="_blank">Pay with Paddle</a>{% endif %}
+        {% if settings.get('enable_paypal') == '1' and settings.get('paypal_details') %}<div class="manual-box"><b>PayPal</b><pre>{{ settings.get('paypal_details') }}</pre></div>{% endif %}
+        {% if settings.get('enable_payoneer') == '1' and settings.get('payoneer_details') %}<div class="manual-box"><b>Payoneer</b><pre>{{ settings.get('payoneer_details') }}</pre></div>{% endif %}
+        {% if settings.get('enable_bank') == '1' and settings.get('bank_details') %}<div class="manual-box"><b>Bank Transfer</b><pre>{{ settings.get('bank_details') }}</pre></div>{% endif %}
+        {% if settings.get('enable_easypaisa') == '1' %}<div class="manual-box"><b>EasyPaisa / Pakistani Payment</b><p>Send payment to: <strong>{{ settings.get('easypaisa_number') }}</strong></p><p>Account Holder name: <strong>{{ settings.get('easypaisa_name') }}</strong></p></div>{% endif %}
+        {% if settings.get('enable_sadapay') == '1' %}<div class="manual-box"><b>SadaPay</b><p>Send payment to: <strong>{{ settings.get('sadapay_number') }}</strong></p><p>Account Holder name: <strong>{{ settings.get('sadapay_name') }}</strong></p></div>{% endif %}
+        {% if settings.get('enable_mashreq') == '1' and settings.get('mashreq_details') %}<div class="manual-box"><b>Mashreq Neo Bank</b><pre>{{ settings.get('mashreq_details') }}</pre></div>{% endif %}
+        {% if settings.get('enable_allied') == '1' and settings.get('allied_details') %}<div class="manual-box"><b>Allied Bank</b><pre>{{ settings.get('allied_details') }}</pre></div>{% endif %}
+        {% if not (settings.get('enable_stripe') == '1' or settings.get('enable_lemon') == '1' or settings.get('enable_paddle') == '1' or settings.get('enable_paypal') == '1' or settings.get('enable_payoneer') == '1' or settings.get('enable_bank') == '1' or settings.get('enable_easypaisa') == '1' or settings.get('enable_sadapay') == '1' or settings.get('enable_mashreq') == '1' or settings.get('enable_allied') == '1') %}
+        <p>No payment methods are enabled yet. Please contact the website owner.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-soft checkout-card">
+      <h2>Submit payment proof</h2>
+      <p>For EasyPaisa, Payoneer, PayPal, or bank transfer, upload a screenshot. Admin approval upgrades your account automatically.</p>
+      <form method="post" enctype="multipart/form-data" class="admin-form">
+        <label>Payment method<select name="method"><option>EasyPaisa</option><option>SadaPay</option><option>Mashreq Neo Bank</option><option>Allied Bank</option><option>Payoneer</option><option>PayPal</option><option>Bank Transfer</option><option>Stripe</option><option>Lemon Squeezy</option><option>Paddle</option></select></label>
+        <div class="form-grid-two"><label>Amount<input name="amount" value="{{ settings.get('plan_price_usd','5') }}"></label><label>Currency<select name="currency"><option>USD</option><option>PKR</option></select></label></div>
+        <label>Transaction reference / sender number<input name="transaction_ref" placeholder="Transaction ID, sender number, or email"></label>
+        <label>Screenshot / receipt<input type="file" name="screenshot" accept=".png,.jpg,.jpeg,.webp,.pdf"></label>
+        <label>Note<textarea name="note" rows="4" placeholder="Any details for admin"></textarea></label>
+        <button class="btn btn-primary btn-large" type="submit">Submit Proof</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="card-soft">
+    <h2>Your payment submissions</h2>
+    <div class="proof-list">
+      {% for p in proofs %}<div class="proof-row"><b>{{ p['method'] }}</b><span>{{ p['amount'] }} {{ p['currency'] }}</span><em class="status-{{ p['status'] }}">{{ p['status']|title }}</em><small>{{ p['created_at'][:16].replace('T',' ') }}</small></div>{% else %}<p>No payment proof submitted yet.</p>{% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

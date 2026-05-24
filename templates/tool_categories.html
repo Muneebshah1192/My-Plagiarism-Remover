@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-hero tools-hero">
+  <div class="hero-copy">
+    <span class="eyebrow">TextForge Workspace</span>
+    <h1>Choose a category, then open a focused tool page.</h1>
+    <p>This cleaner workflow separates every feature into its own page, so users are not confused by too many tools on one screen.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#categoryGrid">Explore tools</a>
+      <a class="btn btn-muted" href="{{ url_for('subscribe') }}">Manage plan</a>
+      {% if current_user and current_user['role'] == 'admin' %}<a class="btn btn-admin" href="{{ url_for('admin_panel') }}">Admin Panel</a>{% endif %}
+    </div>
+  </div>
+  <div class="hero-stat-panel">
+    <div><span>Your plan</span><strong>{{ user_plan.name|title }}</strong></div>
+    <div><span>Today</span><strong>{{ usage_used|int }} / {{ usage_limit|int }}</strong><small>characters</small></div>
+    <div><span>Workflow</span><strong>Multi-page</strong><small>cleaner interface</small></div>
+  </div>
+</section>
+
+<section class="category-index" id="categoryGrid">
+  <div class="section-head">
+    <span class="eyebrow">Tool Categories</span>
+    <h2>Open a category</h2>
+    <p>Each category has its own clean page with focused tool cards.</p>
+  </div>
+  <div class="category-grid-pro">
+    {% for cat, items in tools.items() %}
+    <a class="category-card-pro" href="{{ url_for('tool_category', category_slug=cat_slug(cat)) }}">
+      <div class="category-icon">{{ cat[:1] }}</div>
+      <div>
+        <h3>{{ cat }}</h3>
+        <p>{{ category_descriptions.get(cat, 'Focused tools for professional text workflows.') }}</p>
+      </div>
+      <span>{{ items|length }} tools</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

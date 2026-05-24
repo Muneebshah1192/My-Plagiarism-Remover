@@ -1,70 +1,59 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="app-shell" data-default-strength="{{ settings['default_strength'] if settings else 'strong' }}" data-default-tone="{{ settings['default_tone'] if settings else 'professional' }}">
+{% block body %}
+<div class="app-shell" data-default-strength="{{ settings['default_strength'] if settings else 'strong' }}" data-default-tone="{{ settings['default_tone'] if settings else 'professional' }}" data-engine-mode="{{ settings['engine_mode'] if settings else 'algorithm' }}" data-plan="{{ user_plan.name }}" data-is-premium="{{ 1 if user_plan.is_premium or user_plan.is_trial or user['role']=='admin' else 0 }}">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
-      <a href="{{ url_for('dashboard') }}" class="brand brand-full side-brand">
-        <img class="logo-img" src="{{ url_for('static', filename='assets/logo.svg') }}" alt="{{ app_name }} logo">
-        <span>{{ settings['brand_name'] if settings else app_name }}</span>
-      </a>
+      <a href="{{ url_for('dashboard') }}" class="brand side-brand"><img class="logo-img" src="{{ url_for('static', filename='assets/logo.png') }}" alt="{{ app_name }} logo"><span>{{ settings['brand_name'] if settings else app_name }}</span></a>
       <button class="icon-btn mobile-close" id="closeSidebar" title="Close sidebar">×</button>
       <button class="icon-btn collapse-btn" id="collapseSidebar" title="Collapse sidebar">‹</button>
     </div>
-
-    <div class="search-box"><input id="toolSearch" placeholder="Search tools, templates, reports..."></div>
-
-    <nav class="cat-list" id="categoryList" aria-label="Tool categories">
+    <div class="plan-mini {{ user_plan.name }}"><b>{{ user_plan.name|title }} Plan</b><span>{{ usage_used|int }} / {{ usage_limit|int }} chars today</span></div>
+    <div class="sidebar-section-title">Tool Categories</div>
+    <nav class="cat-list" aria-label="Tool categories">
       {% for cat, items in tools.items() %}
-        <button class="cat-btn {% if loop.first %}active{% endif %}" data-category="{{ cat }}" title="{{ cat }}">
-          <span class="cat-letter">{{ cat[:1] }}</span>
-          <span class="cat-name">{{ cat }}</span>
-          <small>{{ items|length }}</small>
-        </button>
+      <a class="cat-btn {% if cat == selected_category %}active{% endif %}" href="{{ url_for('dashboard_category', category_slug=cat_slug(cat)) }}" title="{{ cat }}">
+        <span class="cat-letter">{{ cat[:1] }}</span><span class="cat-name">{{ cat }}</span><small>{{ items|length }}</small>
+      </a>
       {% endfor %}
     </nav>
-
     <div class="side-footer">
-      <strong>Local workspace</strong>
-      <p>No external API required. Files and text are processed by your Python backend.</p>
+      <strong>Workspace Menu</strong>
+      <p>Open a category, pick a tool, then choose Algorithm or Gemini API mode from the top panel.</p>
+      {% if user['role'] == 'admin' %}<a class="btn btn-admin btn-full" href="{{ url_for('admin_panel') }}">Open Admin Panel</a>{% endif %}
+      <a class="btn btn-primary btn-full" href="{{ url_for('subscribe') }}">Upgrade Plan</a>
     </div>
   </aside>
 
   <main class="workspace">
-    <header class="topbar glass-bar">
+    <header class="topbar improved-topbar">
       <button class="hamburger icon-btn" id="openSidebar" title="Open sidebar">☰</button>
       <div class="top-title">
-        <span class="label">Dashboard</span>
+        <span class="label">{{ selected_category }}</span>
         <h1>Writing Workspace</h1>
-        <p>Welcome, {{ user['name'] }}. Choose a tool, paste text, and create polished output.</p>
+        <p>Welcome, {{ user['name'] }}. Choose a tool, paste text, and generate a polished result.</p>
       </div>
       <div class="top-actions">
+        {% if user['role'] == 'admin' %}<a class="btn btn-admin" href="{{ url_for('admin_panel') }}">Admin Panel</a>{% endif %}
+        <a class="btn btn-muted" href="{{ url_for('pricing') }}">Pricing</a>
         <button class="btn btn-muted" id="themeToggle" title="Toggle theme">🌙 Theme</button>
         <button class="btn btn-muted" id="historyToggle">History</button>
         <div class="menu-wrap">
-          <button class="dots-btn" id="settingsToggle" title="Settings">•••</button>
-          <div class="settings-pop" id="settingsPop">
+          <button class="dots-btn" id="settingsToggle" title="Settings">⋯</button>
+          <div class="settings-pop wide-settings" id="settingsPop">
             <h3>Workspace Settings</h3>
-            <label>Default tone
-              <select id="settingsTone">
-                <option value="professional">Professional</option>
-                <option value="friendly">Friendly</option>
-                <option value="academic">Academic</option>
-                <option value="persuasive">Persuasive</option>
-                <option value="simple">Simple</option>
-              </select>
-            </label>
-            <label>Default rewrite strength
-              <select id="settingsStrength">
-                <option value="light">Light</option>
-                <option value="balanced">Balanced</option>
-                <option value="strong">Strong</option>
-                <option value="maximum">Maximum</option>
-              </select>
-            </label>
-            <label>Brand name
-              <input id="settingsBrand" value="{{ settings['brand_name'] if settings else app_name }}">
-            </label>
+            <div class="engine-box">
+              <div><b>Processing Mode</b><span>Algorithm is built-in. Gemini API mode uses your own API key.</span></div>
+              <label class="switch-row"><span>Algorithm</span><input type="checkbox" id="engineToggle" {% if settings and settings['engine_mode']=='api' %}checked{% endif %}><i></i><span>Gemini API</span></label>
+            </div>
+            <label>Gemini / Google AI Studio API key<input id="geminiKey" type="password" placeholder="Paste your own Gemini API key"></label>
+            <label>Gemini model<input id="geminiModel" value="{{ settings['gemini_model'] if settings else 'gemini-1.5-flash' }}" placeholder="gemini-1.5-flash"></label>
+            <div class="setting-grid">
+              <label>Default tone<select id="settingsTone"><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="academic">Academic</option><option value="persuasive">Persuasive</option><option value="simple">Simple</option></select></label>
+              <label>Default strength<select id="settingsStrength"><option value="light">Light</option><option value="balanced">Balanced</option><option value="strong">Strong</option><option value="maximum">Maximum</option></select></label>
+            </div>
+            <label>Brand name<input id="settingsBrand" value="{{ settings['brand_name'] if settings else app_name }}"></label>
             <button class="btn btn-primary btn-full" id="saveSettings">Save settings</button>
+            {% if current_user and current_user['role'] == 'admin' %}<a href="{{ url_for('admin_panel') }}" class="btn btn-secondary btn-full">Open Admin Panel</a>{% endif %}
             <button class="btn btn-ghost btn-full" id="clearHistory">Clear history</button>
             <a href="{{ url_for('logout') }}" class="btn btn-danger btn-full">Logout</a>
           </div>
@@ -72,128 +61,74 @@
       </div>
     </header>
 
-    <section class="summary-grid">
-      <div class="summary-card"><span>Tools</span><strong>{{ tool_info|length }}</strong><small>working modules</small></div>
-      <div class="summary-card"><span>Exports</span><strong>4</strong><small>TXT, MD, DOCX, PDF</small></div>
-      <div class="summary-card"><span>Mode</span><strong>No API</strong><small>Python processing</small></div>
+    {% if ads_enabled and site_settings.get('ad_header_html') %}<div class="ad-container ad-workspace">{{ site_settings.get('ad_header_html')|safe }}</div>{% endif %}
+
+    <section class="plan-banner card-soft">
+      <div>
+        <span class="label">Your access</span>
+        <h2>{{ user_plan.name|title }} Plan {% if user_plan.is_trial %}<small>Trial active</small>{% endif %}</h2>
+        <p>Daily usage: <b id="usageLive">{{ usage_used|int }}</b> / {{ usage_limit|int }} characters. {% if not user_plan.is_premium and not user_plan.is_trial %}Upgrade to unlock premium tools and Gemini API mode.{% else %}Premium workflows and API mode are unlocked.{% endif %}</p>
+      </div>
+      <a class="btn btn-primary" href="{{ url_for('subscribe') }}">Manage Subscription</a>
     </section>
 
-    <section class="tool-strip premium-card">
-      {% for cat, items in tools.items() %}
-      <div class="tool-group {% if loop.first %}active{% endif %}" data-category="{{ cat }}">
-        {% for tool in items %}
-        <button class="tool-pill {% if loop.first and cat == 'Smart Writing' %}active{% endif %}" data-tool="{{ tool.id }}" data-name="{{ tool.name }}" data-description="{{ tool.description }}">
-          {{ tool.name }}
+    <section class="category-hero card-soft">
+      <div><span class="label">Selected Category</span><h2>{{ selected_category }}</h2><p>{{ category_descriptions.get(selected_category, 'Choose a tool and create polished content.') }}</p></div>
+      <div class="category-stat"><strong>{{ tools[selected_category]|length }}</strong><span>tools available</span></div>
+    </section>
+
+    <section class="tool-library card-soft">
+      <div class="library-head"><div><span class="label">Tool Library</span><h2>Choose one tool</h2></div><div class="search-box"><input id="toolSearch" placeholder="Search tools in this category..."></div></div>
+      <div class="tool-card-grid clearer-tools" id="toolCardGrid">
+        {% for tool in tools[selected_category] %}
+        <button class="tool-card {% if loop.first %}active{% endif %} {% if tool.premium %}premium-tool{% endif %}" data-tool="{{ tool.id }}" data-name="{{ tool.name }}" data-description="{{ tool.description }}" data-premium="{{ 1 if tool.premium else 0 }}">
+          <span>{{ loop.index }}</span><b>{{ tool.name }} {% if tool.premium %}<em>PRO</em>{% endif %}</b><small>{{ tool.description }}</small>
         </button>
         {% endfor %}
       </div>
-      {% endfor %}
+    </section>
+
+    <section class="summary-grid">
+      <div class="summary-card"><span>Current category</span><strong>{{ selected_category }}</strong><small>focused workflow</small></div>
+      <div class="summary-card"><span>Exports</span><strong>4</strong><small>TXT, MD, DOCX, PDF</small></div>
+      <div class="summary-card"><span>Engine</span><strong id="engineLabel">{{ 'Gemini API' if settings and settings['engine_mode']=='api' else 'Algorithm' }}</strong><small>hybrid ready</small></div>
     </section>
 
     <section class="editor-layout">
-      <div class="main-panel premium-card">
+      <div class="main-panel card-soft">
         <div class="panel-header">
-          <div>
-            <span class="label">Selected tool</span>
-            <h2 id="selectedToolName">AI Humanizer</h2>
-            <p id="selectedToolDesc">Rewrite robotic text into a more natural, human-style draft.</p>
-          </div>
+          <div><span class="label">Selected tool</span><h2 id="selectedToolName">{{ tool_info[first_tool][0] }}</h2><p id="selectedToolDesc">{{ tool_info[first_tool][1] }}</p></div>
           <div class="control-row compact">
-            <label>Tone<select id="toneSelect">
-              <option value="professional">Professional</option>
-              <option value="friendly">Friendly</option>
-              <option value="academic">Academic</option>
-              <option value="persuasive">Persuasive</option>
-              <option value="simple">Simple</option>
-            </select></label>
-            <label>Strength<select id="strengthSelect">
-              <option value="light">Light</option>
-              <option value="balanced">Balanced</option>
-              <option value="strong">Strong</option>
-              <option value="maximum">Maximum</option>
-            </select></label>
-            <label>Case<select id="caseSelect">
-              <option value="title">Title Case</option>
-              <option value="sentence">Sentence case</option>
-              <option value="upper">UPPER CASE</option>
-              <option value="lower">lower case</option>
-            </select></label>
+            <label>Tone<select id="toneSelect"><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="academic">Academic</option><option value="persuasive">Persuasive</option><option value="simple">Simple</option></select></label>
+            <label>Strength<select id="strengthSelect"><option value="light">Light</option><option value="balanced">Balanced</option><option value="strong">Strong</option><option value="maximum">Maximum</option></select></label>
+            <label>Case<select id="caseSelect"><option value="title">Title Case</option><option value="sentence">Sentence case</option><option value="upper">UPPER CASE</option><option value="lower">lower case</option></select></label>
           </div>
         </div>
-
+        <div class="engine-inline">
+          <span>Mode:</span><button class="mode-pill active" data-mode="algorithm" id="algoModeBtn">Algorithm</button><button class="mode-pill" data-mode="api" id="apiModeBtn">Gemini API</button><small id="modeHint">Use API mode with your own Gemini key for AI-assisted results.</small>
+        </div>
         <div class="io-grid">
-          <div class="text-card input-card">
-            <div class="text-card-head">
-              <h3>Input</h3>
-              <div>
-                <label class="mini file-label" title="Upload document">Upload<input type="file" id="fileUpload" accept=".txt,.md,.docx,.pdf"></label>
-                <button class="mini" id="sampleBtn" title="Insert sample text">Sample</button>
-                <button class="mini" id="clearInput" title="Clear both boxes">Clear</button>
-              </div>
-            </div>
-            <textarea id="inputText" placeholder="Paste your text here. You can also upload TXT, MD, DOCX, or PDF files."></textarea>
-          </div>
-          <div class="text-card output-card">
-            <div class="text-card-head">
-              <h3>Output</h3>
-              <div>
-                <button class="mini" id="copyOutput" title="Copy result">Copy</button>
-                <button class="mini" id="useAsInput" title="Move output to input">Use as input</button>
-              </div>
-            </div>
-            <textarea id="outputText" placeholder="Your polished result will appear here."></textarea>
-          </div>
+          <div class="text-card input-card"><div class="text-card-head"><h3>Input</h3><div><label class="mini file-label">Upload<input type="file" id="fileUpload" accept=".txt,.md,.docx,.pdf"></label><button class="mini" id="sampleBtn">Sample</button><button class="mini" id="clearInput">Clear</button></div></div><textarea id="inputText" placeholder="Paste text here or upload TXT, MD, DOCX, or PDF files."></textarea></div>
+          <div class="text-card output-card"><div class="text-card-head"><h3>Output</h3><div><button class="mini" id="copyOutput">Copy</button><button class="mini" id="useAsInput">Use as input</button></div></div><textarea id="outputText" placeholder="Your result will appear here."></textarea></div>
         </div>
-
+        {% if ads_enabled and site_settings.get('ad_tool_html') %}<div class="ad-container ad-tool">{{ site_settings.get('ad_tool_html')|safe }}</div>{% endif %}
         <div class="action-bar">
           <button class="btn btn-primary btn-run" id="runTool">Run Tool</button>
           <button class="btn btn-muted" id="compareBtn">Refresh Analytics</button>
-          <div class="export-wrap">
-            <select id="exportFormat"><option value="txt">TXT</option><option value="md">Markdown</option><option value="docx">MS Word DOCX</option><option value="pdf">PDF</option></select>
-            <button class="btn btn-muted" id="exportBtn">Export</button>
-          </div>
+          <div class="export-wrap"><select id="exportFormat"><option value="txt">TXT</option><option value="md">Markdown</option><option value="docx">MS Word DOCX</option><option value="pdf">PDF</option></select><button class="btn btn-muted" id="exportBtn">Export</button></div>
           <span class="status" id="statusText"></span>
         </div>
       </div>
 
       <aside class="analytics-panel">
-        <div class="analytics-card premium-card">
-          <h3>Writing Analytics</h3>
-          <div class="metric"><span>Similarity</span><strong id="mSimilarity">0%</strong></div>
-          <div class="bar"><i id="barSimilarity"></i></div>
-          <div class="metric"><span>Originality lift</span><strong id="mLift">0%</strong></div>
-          <div class="bar"><i id="barLift"></i></div>
-          <div class="metric"><span>Phrase overlap</span><strong id="mPhrase">0%</strong></div>
-          <div class="bar"><i id="barPhrase"></i></div>
-          <div class="metric"><span>Readability</span><strong id="mReadability">0</strong></div>
-          <div class="bar"><i id="barReadability"></i></div>
-          <div class="stats-grid">
-            <span><b id="mWords">0</b> Words</span><span><b id="mSentences">0</b> Sentences</span><span><b id="mReading">0</b> Min read</span><span><b id="mChars">0</b> Chars</span>
-          </div>
-        </div>
-        <div class="analytics-card tips premium-card">
-          <h3>Professional Tips</h3>
-          <p>Use <b>Maximum</b> for stronger rewriting, <b>Professional</b> for business copy, and <b>Simple</b> for easier reading. Export final work as PDF or DOCX.</p>
-        </div>
+        <div class="analytics-card card-soft"><h3>Writing Analytics</h3><div class="metric"><span>Similarity</span><strong id="mSimilarity">0%</strong></div><div class="bar"><i id="barSimilarity"></i></div><div class="metric"><span>Originality lift</span><strong id="mLift">0%</strong></div><div class="bar"><i id="barLift"></i></div><div class="metric"><span>Phrase overlap</span><strong id="mPhrase">0%</strong></div><div class="bar"><i id="barPhrase"></i></div><div class="metric"><span>Readability</span><strong id="mReadability">0</strong></div><div class="bar"><i id="barReadability"></i></div><div class="stats-grid"><span><b id="mWords">0</b> Words</span><span><b id="mSentences">0</b> Sentences</span><span><b id="mReading">0</b> Min read</span><span><b id="mChars">0</b> Chars</span></div></div>
+        {% if ads_enabled and site_settings.get('ad_sidebar_html') %}<div class="ad-container ad-sidebar">{{ site_settings.get('ad_sidebar_html')|safe }}</div>{% endif %}
+        <div class="analytics-card tips card-soft"><h3>Responsible Use</h3><p>Use the output as a writing draft. Review meaning, add your own examples, and cite borrowed ideas where required.</p></div>
       </aside>
     </section>
   </main>
 
-  <aside class="history-panel" id="historyPanel">
-    <div class="history-head"><h2>Recent Work</h2><button id="closeHistory">×</button></div>
-    <div class="history-list">
-      {% for item in history %}
-      <button class="history-item" data-id="{{ item['id'] }}">
-        <strong>{{ tool_info[item['tool_id']][0] if item['tool_id'] in tool_info else item['tool_id'] }}</strong>
-        <span>{{ item['created_at'][:16].replace('T',' ') }}</span>
-        <p>{{ item['output_text'][:120] }}...</p>
-      </button>
-      {% else %}
-      <p class="empty-history">No saved history yet.</p>
-      {% endfor %}
-    </div>
-  </aside>
+  <aside class="history-panel" id="historyPanel"><div class="history-head"><h2>Recent Work</h2><button id="closeHistory">×</button></div><div class="history-list">{% for item in history %}<button class="history-item" data-id="{{ item['id'] }}"><strong>{{ tool_info[item['tool_id']][0] if item['tool_id'] in tool_info else item['tool_id'] }}</strong><span>{{ item['created_at'][:16].replace('T',' ') }} · {{ item['engine_used'] if item['engine_used'] else 'algorithm' }}</span><p>{{ item['output_text'][:120] }}...</p></button>{% else %}<p class="empty-history">No saved history yet.</p>{% endfor %}</div></aside>
 </div>
-
 <script id="toolData" type="application/json">{{ tools|tojson }}</script>
 {% endblock %}

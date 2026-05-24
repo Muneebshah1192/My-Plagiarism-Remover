@@ -1,67 +1,60 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="marketing-bg">
-  <nav class="landing-nav">
-    <a href="{{ url_for('index') }}" class="brand brand-full">
-      <img class="logo-img" src="{{ url_for('static', filename='assets/logo.svg') }}" alt="{{ app_name }} logo">
-      <span>{{ app_name }}</span>
-    </a>
-    <div class="nav-actions">
-      <a href="{{ url_for('login') }}" class="ghost-link">Login</a>
-      <a href="{{ url_for('signup') }}" class="btn btn-primary">Get Started</a>
-    </div>
-  </nav>
-
-  <main class="hero">
+<main class="home-page">
+  <section class="hero-section">
     <div class="hero-copy">
-      <div class="eyebrow">Professional offline text workspace</div>
-      <h1>Write, polish, analyze, and export better content in one beautiful dashboard.</h1>
-      <p>{{ app_name }} is a platform-neutral Python web app with {{ feature_count }} working no-API text tools for writers, students, freelancers, marketers, and small businesses.</p>
+      <span class="eyebrow">Professional Text Tools Workspace</span>
+      <h1>Rewrite, analyze, polish, and export content from one clean dashboard.</h1>
+      <p>{{ app_name }} gives users a focused writing workspace with no-API Python tools for humanizing text, improving clarity, creating SEO content, writing prompts, producing business copy, and exporting documents.</p>
       <div class="hero-actions">
-        <a href="{{ url_for('signup') }}" class="btn btn-primary btn-large">Create free account</a>
-        <a href="{{ url_for('login') }}" class="btn btn-muted btn-large">Open dashboard</a>
+        <a href="{{ url_for('signup') }}" class="btn btn-primary btn-large">Create Free Account</a>
+        <a href="{{ url_for('guides') }}" class="btn btn-secondary btn-large">Read Writing Guides</a>
       </div>
-      <div class="trust-row">
-        <span>✓ No external API required</span>
-        <span>✓ PDF/DOCX export</span>
-        <span>✓ Responsive dashboard</span>
-      </div>
+      <div class="trust-row"><span>✓ {{ feature_count }} working tools</span><span>✓ PDF & DOCX export</span><span>✓ Admin ad manager</span></div>
     </div>
-    <div class="hero-card premium-card">
-      <div class="mock-toolbar">
-        <span></span><span></span><span></span>
-        <b>Writing Workspace</b>
-      </div>
-      <div class="mock-stats">
-        <div><strong>87</strong><small>Tools</small></div>
-        <div><strong>PDF</strong><small>Export</small></div>
-        <div><strong>DOCX</strong><small>Export</small></div>
-      </div>
-      <div class="mock-grid">
-        <div class="mock-sidebar"><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="mock-main">
-          <div class="mock-title"></div>
-          <div class="mock-editor-pair"><section></section><section></section></div>
-          <div class="mock-lines"><i></i><i></i><i></i></div>
+    <div class="hero-visual card-soft">
+      <div class="mock-window">
+        <div class="mock-head"><i></i><i></i><i></i><b>Workspace</b></div>
+        <div class="mock-body">
+          <aside><span></span><span></span><span></span><span></span></aside>
+          <main><div class="mock-title"></div><section></section><section class="tinted"></section><div class="mock-button"></div></main>
         </div>
       </div>
     </div>
-  </main>
+  </section>
 
-  <section class="feature-section">
-    <div class="section-head">
-      <h2>Organized tools for every writing workflow</h2>
-      <p>Choose from smart writing, student work, business copy, SEO, social content, document tools, and analytics. Everything is implemented with local Python logic.</p>
+  <section class="section-block">
+    <div class="section-head"><span class="eyebrow">Main Features</span><h2>Built for everyday writers, students, creators, and online businesses.</h2></div>
+    <div class="feature-grid">
+      <article><b>AI Humanizer</b><p>Transforms stiff or repetitive drafts into more natural writing with better flow.</p></article>
+      <article><b>Originality Support</b><p>Reduces visible text overlap with rewriting, sentence restructuring, and similarity analytics.</p></article>
+      <article><b>AI Prompt Generator</b><p>Creates structured prompts for videos, writing, marketing, study, and automation workflows.</p></article>
+      <article><b>SEO Writing Tools</b><p>Generate titles, meta descriptions, FAQs, keyword reports, slugs, and content briefs.</p></article>
+      <article><b>Student Tools</b><p>Create study notes, MCQs, flashcards, definitions, essay outlines, and summaries.</p></article>
+      <article><b>Business & Social Tools</b><p>Draft emails, proposals, posts, scripts, captions, hooks, CTAs, and client documents.</p></article>
     </div>
-    <div class="category-grid">
+  </section>
+
+  <section class="section-block two-col-section">
+    <div>
+      <span class="eyebrow">Tool Categories</span>
+      <h2>Simple navigation. Clear categories. Less mess.</h2>
+      <p>The dashboard uses a clean sidebar category system. Choose a category, open its dedicated page, select a tool card, paste text, and run the output in the editor.</p>
+    </div>
+    <div class="category-preview-grid">
       {% for cat, ids in categories.items() %}
-      <div class="category-card">
-        <span class="category-icon">{{ cat[:1] }}</span>
-        <h3>{{ cat }}</h3>
-        <p>{{ ids|length }} working tools included</p>
-      </div>
+      <a href="{{ url_for('signup') }}" class="category-preview"><span>{{ cat[:1] }}</span><b>{{ cat }}</b><small>{{ ids|length }} tools</small></a>
       {% endfor %}
     </div>
   </section>
-</div>
+
+  <section class="section-block">
+    <div class="section-head"><span class="eyebrow">Helpful SEO Content</span><h2>Guides included for better AdSense readiness and reader value.</h2></div>
+    <div class="guide-grid">
+      {% for slug, guide in guides.items() %}
+      <a class="guide-card" href="{{ url_for('guide_detail', slug=slug) }}"><h3>{{ guide.title }}</h3><p>{{ guide.description }}</p><span>Read guide →</span></a>
+      {% endfor %}
+    </div>
+  </section>
+</main>
 {% endblock %}

@@ -1,29 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="auth-bg">
-  <div class="auth-card premium-card">
-    <a href="{{ url_for('index') }}" class="brand brand-full auth-brand">
-      <img class="logo-img" src="{{ url_for('static', filename='assets/logo.svg') }}" alt="{{ app_name }} logo">
-      <span>{{ app_name }}</span>
-    </a>
-    <h1>{{ 'Create your account' if mode == 'signup' else 'Welcome back' }}</h1>
-    <p>{{ 'Start using the complete writing workspace.' if mode == 'signup' else 'Login to open your dashboard.' }}</p>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, msg in messages %}<div class="alert {{ category }}">{{ msg }}</div>{% endfor %}
-      {% endif %}
-    {% endwith %}
+<main class="auth-page premium-auth">
+  <section class="auth-card card-soft auth-card-upgraded">
+    <a href="{{ url_for('index') }}" class="brand auth-brand"><img class="logo-img" src="{{ url_for('static', filename='assets/logo.png') }}" alt="{{ app_name }} logo"><span>{{ app_name }}</span></a>
+    <span class="eyebrow">{{ 'Create Account' if mode == 'signup' else 'Welcome Back' }}</span>
+    <h1>{{ 'Start your writing workspace' if mode == 'signup' else 'Login to your workspace' }}</h1>
+    <p>{{ 'Create a free account with a 1-day trial, daily usage limits, history, exports, and premium-ready writing tools.' if mode == 'signup' else 'Enter your email, password, and captcha answer to continue.' }}</p>
     <form method="post" class="auth-form">
-      {% if mode == 'signup' %}
-      <label>Full name<input name="name" placeholder="Your name" required></label>
-      {% endif %}
+      {% if mode == 'signup' %}<label>Name<input type="text" name="name" placeholder="Your name" required></label>{% endif %}
       <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
-      <label>Password<input type="password" name="password" placeholder="Minimum 6 characters" required></label>
-      <button class="btn btn-primary btn-full" type="submit">{{ 'Sign up' if mode == 'signup' else 'Login' }}</button>
+      <label>Password<input type="password" name="password" placeholder="Password" required></label>
+      <div class="captcha-box">
+        <div><b>Human check</b><span>Solve this simple captcha: {{ captcha_question }}</span></div>
+        <input type="number" name="captcha" placeholder="Answer" required>
+      </div>
+      <button class="btn btn-primary btn-full" type="submit">{{ 'Create account' if mode == 'signup' else 'Login' }}</button>
     </form>
-    <p class="auth-switch">
-      {% if mode == 'signup' %}Already have an account? <a href="{{ url_for('login') }}">Login</a>{% else %}New here? <a href="{{ url_for('signup') }}">Create account</a>{% endif %}
-    </p>
-  </div>
-</div>
+    <p class="auth-switch">{% if mode == 'signup' %}Already have an account? <a href="{{ url_for('login') }}">Login</a>{% else %}New here? <a href="{{ url_for('signup') }}">Create account</a>{% endif %}</p>
+  </section>
+</main>
 {% endblock %}
