@@ -11,7 +11,7 @@
   <title>{{ title if title else app_name }}</title>
   <link rel="icon" href="{{ url_for('static', filename='assets/favicon.svg') }}">
   <script>
-    (function(){try{var t=localStorage.getItem('textforge-theme-v4')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+    (function(){try{var t=localStorage.getItem('textforge-theme-v5')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
   </script>
   {% if ads_enabled and site_settings.get('adsense_head_script') %}
   {{ site_settings.get('adsense_head_script')|safe }}
@@ -53,6 +53,7 @@
         {% if current_user %}
           {% if current_user['role'] == 'admin' %}<a href="{{ url_for('admin_panel') }}">Admin</a>{% endif %}
           <a href="{{ url_for('tools_home') }}" class="nav-cta">Workspace</a>
+          <a href="{{ url_for('logout') }}" class="nav-logout">Sign out</a>
         {% else %}
           <a href="{{ url_for('login') }}">Login</a>
           <a href="{{ url_for('signup') }}" class="nav-cta">Start Free</a>

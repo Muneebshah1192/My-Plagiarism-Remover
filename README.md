@@ -21,6 +21,19 @@ TextForge Studio is a platform-neutral Flask web app for writing, rewriting, SEO
 - Hybrid mode fallback: if API fails, built-in algorithm still runs
 - TXT, MD, DOCX, and PDF import/export support
 
+## Admin Login
+
+Email:
+
+```text
+muneebshah1192@gmail.com
+```
+
+Password:
+
+```text
+Muneebshah1192@theadmin.com
+```
 
 Change this password and `SECRET_KEY` before publishing.
 
@@ -88,6 +101,15 @@ This build includes:
 - Improved input/output text contrast and output panel tint.
 - Manual EasyPaisa proof approval upgrades users to premium automatically.
 
+Default admin login:
+
+```text
+Email: muneebshah1192@gmail.com
+Password: Muneebshah1192@theadmin.com
+```
+
+Change `ADMIN_PASSWORD` and `SECRET_KEY` before publishing.
+
 ## UI v2 Bright Professional Update
 This build uses a bright gradient interface by default, improved dark mode contrast, larger readable typography, clearer sidebar cards, fixed dropdown z-index, and highly visible input/output text areas. Browser theme storage now uses a new key so old dark-mode cache does not force the previous heavy dark interface for returning testers.
 
@@ -103,8 +125,8 @@ The main navigation includes a **Tools** dropdown that shows every category. Use
 ## Admin access
 Admin login remains:
 
-- Email: `just me`
-- Password: `just me`
+- Email: `muneebshah1192@gmail.com`
+- Password: `Muneebshah1192@theadmin.com`
 
 Change the admin password and `SECRET_KEY` before publishing.
 

@@ -7,7 +7,7 @@
 
   function setTheme(theme){
     document.documentElement.setAttribute('data-theme', theme);
-    try{ localStorage.setItem('textforge-theme-v4', theme); }catch(e){}
+    try{ localStorage.setItem('textforge-theme-v5', theme); }catch(e){}
     const btn = $('themeToggle');
     if(btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
   }
