@@ -18,10 +18,10 @@ DB_PATH = os.getenv('DATABASE_PATH', os.path.join(os.path.dirname(__file__), 'in
 UPLOAD_EXTENSIONS = {'.txt', '.md', '.docx', '.pdf'}
 PROJECT_CREATED_AT = os.getenv('PROJECT_CREATED_AT', 'May 25, 2026 at 01:18 AM PKT')
 OWNER_NAME = os.getenv('OWNER_NAME', 'Syed Muneeb')
-OWNER_EMAIL = os.getenv('OWNER_EMAIL', 'use your own')
+OWNER_EMAIL = os.getenv('OWNER_EMAIL', 'muneebshah1192@gmail.com')
 OWNER_PHONE = os.getenv('OWNER_PHONE', '03140895219')
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', OWNER_EMAIL)
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'use your own')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'Muneebshah1192@theadmin.com')
 PAYMENT_UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'instance', 'payment_proofs')
 
 app = Flask(__name__)
