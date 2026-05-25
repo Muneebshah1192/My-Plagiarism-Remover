@@ -21,7 +21,7 @@ OWNER_NAME = os.getenv('OWNER_NAME', 'Syed Muneeb')
 OWNER_EMAIL = os.getenv('OWNER_EMAIL', 'muneebshah1192@gmail.com')
 OWNER_PHONE = os.getenv('OWNER_PHONE', '03140895219')
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', OWNER_EMAIL)
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'Muneebshah1192@theadmin.com')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'contact me to but')
 PAYMENT_UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'instance', 'payment_proofs')
 
 app = Flask(__name__)
